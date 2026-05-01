@@ -1,3 +1,5 @@
+#include <SimpleDHT.h>
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -26,11 +28,13 @@ const char* pwd  = "Th@pelo0127";
 
 const char* MQTT_BROKER   = "broker.hivemq.com";
 const uint16_t MQTT_PORT  = 1883;
-const char* MQTT_CLIENT_ID = "ESP32_SmartFarm_Node01";
+const char* MQTT_CLIENT_ID = "ESP32_SmartFarm_Kabo";
 
 // ================= TIMING =================
-const uint32_t PUBLISH_INTERVAL_MS = 1000;  // Publish every second
+const uint32_t PUBLISH_INTERVAL_MS = 10000;  // Publish every 10 seconds
+const uint32_t SENSOR_READ_INTERVAL_MS = 5000;  // Read sensors every 5 seconds
 uint32_t lastPublishMs = 0;
+uint32_t lastSensorReadMs = 0;
 
 // ================= OBJECTS =================
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -74,7 +78,7 @@ void publishFloat(const char* topic, float value, uint8_t decimals = 2) {
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // WiFi connection
   WiFi.begin(ssid, pwd);
@@ -94,7 +98,7 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Smart Farm");
   lcd.setCursor(0, 1);
-  lcd.print(WiFi.localIP());
+  lcd.print("Initializing...");
 
   // Pin modes
   pinMode(LEDPIN, OUTPUT);
@@ -128,11 +132,38 @@ void loop() {
   }
   mqtt.loop();
 
-  // Publish sensor data at regular intervals
   uint32_t now = millis();
+  
+  // Read sensors at slower interval
+  if (now - lastSensorReadMs >= SENSOR_READ_INTERVAL_MS) {
+    lastSensorReadMs = now;
+    getSensorData();
+    
+    // Update LCD with temperature and humidity
+    lcd.setCursor(0, 0);
+    lcd.print("T:");
+    lcd.print(temperature);
+    lcd.print("C H:");
+    lcd.print(humidity);
+    lcd.print("%");
+    lcd.setCursor(0, 1);
+    lcd.print("WiFi:");
+    if (WiFi.status() == WL_CONNECTED) {
+      lcd.print("OK");
+    } else {
+      lcd.print("NO");
+    }
+    lcd.print(" MQTT:");
+    if (mqtt.connected()) {
+      lcd.print("OK");
+    } else {
+      lcd.print("NO");
+    }
+  }
+  
+  // Publish sensor data at slower interval
   if (now - lastPublishMs >= PUBLISH_INTERVAL_MS) {
     lastPublishMs = now;
-    getSensorData();
     
     publishFloat("TEMPERATURE", (float)temperature, 2);
     publishFloat("HUMIDITY", (float)humidity, 2);
