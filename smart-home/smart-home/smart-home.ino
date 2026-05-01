@@ -31,8 +31,8 @@ const uint16_t MQTT_PORT  = 1883;
 const char* MQTT_CLIENT_ID = "ESP32_SmartFarm_Kabo";
 
 // ================= TIMING =================
-const uint32_t PUBLISH_INTERVAL_MS = 10000;  // Publish every 10 seconds
-const uint32_t SENSOR_READ_INTERVAL_MS = 5000;  // Read sensors every 5 seconds
+const uint32_t PUBLISH_INTERVAL_MS = 2000;  // Publish every 2 seconds
+const uint32_t SENSOR_READ_INTERVAL_MS = 2000;  // Read sensors every 2 seconds
 uint32_t lastPublishMs = 0;
 uint32_t lastSensorReadMs = 0;
 
