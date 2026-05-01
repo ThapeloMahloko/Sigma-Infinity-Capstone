@@ -37,9 +37,6 @@ def on_message(client, userdata, message):
         rainfall=rainfall)
     session.add(Data)
     session.commit()
-    print(str(datetime.now()))
-    last_entry = session.query(SensorReading).order_by(SensorReading.id.desc()).first()
-    print(f"Latest entry in database: {last_entry}")
 
 mqttBroker = "broker.hivemq.com"
 client = "ESP32_SmartFarm_Receiver"
