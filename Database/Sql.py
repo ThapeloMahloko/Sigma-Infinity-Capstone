@@ -38,24 +38,6 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-for i in range(10):
-    reading = SensorReading(
-        timestamp=datetime(2025, 6, 1, 8, i, 0),
-        temperature=20.0 + i,
-        humidity=60.0 + i,
-        ambient_light=10000.0 + (i * 1000),
-        soil_moisture=40.0 + (i * 2),
-        water_level=70.0 + (i * 3),
-        rainfall=(5.0 + (i * 0.5)) if i % 2 == 0 else 0.0,
-        motion_detection=0.0,
-        ultrasonic_distance=150.0 - (i * 5),
-        pump_status=0.0,
-        fan_status=0.0
-        #steam_status=
-    )
-    session.add(reading)
-
-session.commit()
 
 hot = (
     session.query(SensorReading)
@@ -75,10 +57,6 @@ stats = session.query(
     func.avg(SensorReading.ambient_light).label('light_avg'),
     func.max(SensorReading.ambient_light).label('light_max'),
 ).one()
-
-print(f"Temperature: min={stats.temp_min:.1f}°C, avg={stats.temp_avg:.1f}°C, max={stats.temp_max:.1f}°C")
-print(f"Humidity: min={stats.humid_min:.1f}%RH, avg={stats.humid_avg:.1f}%RH, max={stats.humid_max:.1f}%RH")
-print(f"Ambient Light: min={stats.light_min:.1f} lux, avg={ stats.light_avg:.1f} lux, max={stats.light_max:.1f} lux")   
 
 session.query(SensorReading)
 
