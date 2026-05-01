@@ -2,20 +2,25 @@ from __future__ import annotations
 
 import json
 import os
+import socket
+import sys
 import time
 from datetime import datetime
+from pathlib import Path
 
 import paho.mqtt.client as mqtt
 
-try:
-    from Database.Sql import SensorReading, get_session, init_db
-except ImportError:
-    from Sql import SensorReading, get_session, init_db
+# Add parent directory to path so Database module is accessible
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from Database.Sql import SensorReading, get_session, init_db
 
 
 BROKER_HOST = os.getenv("SMART_FARM_BROKER_HOST", "broker.hivemq.com")
 BROKER_PORT = int(os.getenv("SMART_FARM_BROKER_PORT", "1883"))
 TEAM_ID = os.getenv("SMART_FARM_TEAM_ID", "team01")
+DEFAULT_CLIENT_ID = f"SmartFarm_Receiver_{socket.gethostname()}_{os.getpid()}"
+CLIENT_ID = os.getenv("SMART_FARM_CLIENT_ID", DEFAULT_CLIENT_ID)
 BASE_TOPIC = f"epg317e/farm/{TEAM_ID}"
 
 TOPIC_MAP = {
@@ -36,6 +41,20 @@ TOPIC_MAP = {
     "fan": ("fan_status", "fan_status"),
     "fan_status": ("fan_status", "fan_status"),
 }
+
+LEGACY_SENSOR_TOPICS = {
+    "TEMPERATURE",
+    "HUMIDITY",
+    "SOIL_MOISTURE",
+    "LIGHT_LEVEL",
+    "WATER_LEVEL",
+    "RAIN_VALUE",
+}
+
+# Buffer for batch-based ingestion from legacy uppercase topics.
+sensor_data = {topic: None for topic in LEGACY_SENSOR_TOPICS}
+received_topics = set()
+ready_for_new_batch = True
 
 
 def topic_suffix(topic: str) -> str:
@@ -101,6 +120,32 @@ def save_message(topic: str, payload_text: str) -> None:
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {topic} -> {payload_text}")
 
 
+def publish_batch_to_database() -> None:
+    global ready_for_new_batch, received_topics
+
+    print("\n" + "=" * 60)
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] COMPLETE DATA BATCH")
+    print("=" * 60)
+    print(f"TEMPERATURE:   {sensor_data['TEMPERATURE']}C")
+    print(f"HUMIDITY:      {sensor_data['HUMIDITY']}%")
+    print(f"SOIL_MOISTURE: {sensor_data['SOIL_MOISTURE']}%")
+    print(f"LIGHT_LEVEL:   {sensor_data['LIGHT_LEVEL']}%")
+    print(f"WATER_LEVEL:   {sensor_data['WATER_LEVEL']}%")
+    print(f"RAIN_VALUE:    {sensor_data['RAIN_VALUE']}%")
+    print("=" * 60)
+
+    for topic_name, payload_text in sensor_data.items():
+        if payload_text is not None:
+            save_message(topic_name, str(payload_text))
+
+    print("Waiting 5 seconds before accepting next batch...\n")
+    time.sleep(5)
+
+    received_topics.clear()
+    ready_for_new_batch = True
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Ready for next batch\n")
+
+
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code.is_failure:
         print(f"Failed to connect: {reason_code}")
@@ -133,6 +178,22 @@ def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
 
 
 def on_message(client, userdata, message):
+    global ready_for_new_batch, received_topics
+
+    if not ready_for_new_batch:
+        return
+
+    if message.topic in LEGACY_SENSOR_TOPICS:
+        payload_text = message.payload.decode("utf-8", errors="replace")
+        sensor_data[message.topic] = payload_text
+        received_topics.add(message.topic)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] {message.topic}: {payload_text}")
+
+        if len(received_topics) == len(LEGACY_SENSOR_TOPICS):
+            ready_for_new_batch = False
+            publish_batch_to_database()
+        return
+
     payload_text = message.payload.decode("utf-8", errors="replace")
 
     try:
@@ -152,13 +213,13 @@ def on_message(client, userdata, message):
 def main() -> None:
     init_db()
 
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="SmartFarm_Receiver")
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=CLIENT_ID)
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
     client.on_message = on_message
     client.reconnect_delay_set(min_delay=1, max_delay=30)
 
-    print(f"Connecting to broker {BROKER_HOST}:{BROKER_PORT} ...")
+    print(f"Connecting to broker {BROKER_HOST}:{BROKER_PORT} as {CLIENT_ID} ...")
     client.connect(BROKER_HOST, port=BROKER_PORT, keepalive=60)
     client.loop_start()
 
