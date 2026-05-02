@@ -10,6 +10,7 @@ import pandas as pd
 import panel as pn
 import param
 import sqlalchemy as sa
+import paho.mqtt.client as mqtt
 
 from Database.Sql import DATABASE_PATH, SensorReading, init_db
 
@@ -501,6 +502,165 @@ pn.config.raw_css.append(DASHBOARD_CSS)
 
 class RealtimeDashboardState(param.Parameterized):
     df = param.Parameter(default=pd.DataFrame(columns=READING_COLUMNS))
+
+
+# ================= MQTT CONFIGURATION =================
+MQTT_BROKER = os.getenv("SMART_FARM_BROKER_HOST", "broker.hivemq.com")
+MQTT_PORT = int(os.getenv("SMART_FARM_BROKER_PORT", "1883"))
+MQTT_TEAM_ID = os.getenv("SMART_FARM_TEAM_ID", "team01")
+MQTT_BASE_TOPIC = f"epg317e/farm/{MQTT_TEAM_ID}"
+
+MQTT_TOPICS = {
+    "fan": f"{MQTT_BASE_TOPIC}/fan",
+    "pump": f"{MQTT_BASE_TOPIC}/pump",
+    "light": f"{MQTT_BASE_TOPIC}/light",
+    "temperature": f"{MQTT_BASE_TOPIC}/temperature",
+    "humidity": f"{MQTT_BASE_TOPIC}/humidity",
+    "soil_moisture": f"{MQTT_BASE_TOPIC}/soil_moisture",
+}
+
+# MQTT State management
+mqtt_state = {
+    "fan": "OFF",
+    "pump": "OFF",
+    "light": "OFF",
+    "connected": False
+}
+
+# MQTT UI Elements
+mqtt_status_text = pn.pane.Markdown("## 🔌 MQTT: Initializing...")
+mqtt_log_box = pn.pane.Markdown("### 📡 Activity Log:\n")
+mqtt_fan_status = pn.pane.Markdown("**🌬 Fan:** OFF")
+mqtt_pump_status = pn.pane.Markdown("**💧 Pump:** OFF")
+mqtt_light_status = pn.pane.Markdown("**💡 Light:** OFF")
+
+
+def mqtt_log(msg):
+    """Add message to MQTT activity log"""
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    mqtt_log_box.object += f"- `[{timestamp}]` {msg}\n"
+    # Keep only last 50 lines
+    lines = mqtt_log_box.object.split("\n")
+    if len(lines) > 55:
+        mqtt_log_box.object = "### 📡 Activity Log:\n" + "\n".join(lines[-50:])
+
+
+def mqtt_update_ui():
+    """Update MQTT control panel UI"""
+    status = "🟢 Connected" if mqtt_state["connected"] else "🔴 Disconnected"
+    mqtt_status_text.object = f"## 🔌 MQTT: {status}\n**Broker:** {MQTT_BROKER}:{MQTT_PORT} | **Team:** {MQTT_TEAM_ID}"
+    
+    fan_color = "🟢" if mqtt_state["fan"] == "ON" else "⚪"
+    pump_color = "🟢" if mqtt_state["pump"] == "ON" else "⚪"
+    light_color = "🟢" if mqtt_state["light"] == "ON" else "⚪"
+    
+    mqtt_fan_status.object = f"**{fan_color} Fan:** {mqtt_state['fan']}"
+    mqtt_pump_status.object = f"**{pump_color} Pump:** {mqtt_state['pump']}"
+    mqtt_light_status.object = f"**{light_color} Light:** {mqtt_state['light']}"
+
+
+def mqtt_on_connect(client, userdata, flags, rc):
+    """MQTT connect callback"""
+    if rc == 0:
+        mqtt_state["connected"] = True
+        mqtt_log("✅ Connected to MQTT broker")
+        mqtt_update_ui()
+        
+        # Subscribe to all control topics
+        for topic in MQTT_TOPICS.values():
+            client.subscribe(topic, qos=1)
+        mqtt_log(f"📡 Subscribed to {len(MQTT_TOPICS)} topics")
+    else:
+        mqtt_state["connected"] = False
+        mqtt_log(f"❌ Connection failed (code: {rc})")
+        mqtt_update_ui()
+
+
+def mqtt_on_message(client, userdata, msg):
+    """MQTT message callback"""
+    topic = msg.topic
+    message = msg.payload.decode("utf-8", errors="replace").strip()
+    
+    mqtt_log(f"📨 {topic.split('/')[-1]} → {message}")
+    
+    # Update state based on topic
+    if topic == MQTT_TOPICS["fan"]:
+        mqtt_state["fan"] = message
+    elif topic == MQTT_TOPICS["pump"]:
+        mqtt_state["pump"] = message
+    elif topic == MQTT_TOPICS["light"]:
+        mqtt_state["light"] = message
+    
+    mqtt_update_ui()
+
+
+# Initialize MQTT Client
+mqtt_client = mqtt.Client(client_id=f"SmartFarm_Dashboard_{socket.gethostname()}")
+mqtt_client.on_connect = mqtt_on_connect
+mqtt_client.on_message = mqtt_on_message
+
+try:
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    mqtt_client.loop_start()
+except Exception as e:
+    mqtt_log(f"⚠️ Failed to connect: {str(e)}")
+
+
+def mqtt_toggle_device(device_name):
+    """Toggle MQTT device state"""
+    if device_name not in mqtt_state or device_name == "connected":
+        return
+    
+    current_state = mqtt_state[device_name]
+    new_state = "OFF" if current_state == "ON" else "ON"
+    
+    try:
+        mqtt_client.publish(MQTT_TOPICS[device_name], new_state, qos=1)
+        mqtt_log(f"📤 Sent: {device_name.upper()} → {new_state}")
+        mqtt_state[device_name] = new_state
+        mqtt_update_ui()
+    except Exception as e:
+        mqtt_log(f"❌ Publish failed: {str(e)}")
+
+
+# ================= MQTT CONTROL BUTTONS =================
+mqtt_fan_btn = pn.widgets.Button(
+    name="🌬 Toggle Fan", 
+    button_type="primary",
+    width=150
+)
+mqtt_pump_btn = pn.widgets.Button(
+    name="💧 Toggle Pump", 
+    button_type="primary",
+    width=150
+)
+mqtt_light_btn = pn.widgets.Button(
+    name="💡 Toggle Light", 
+    button_type="primary",
+    width=150
+)
+
+mqtt_fan_btn.on_click(lambda e: mqtt_toggle_device("fan"))
+mqtt_pump_btn.on_click(lambda e: mqtt_toggle_device("pump"))
+mqtt_light_btn.on_click(lambda e: mqtt_toggle_device("light"))
+
+
+def create_mqtt_control_panel():
+    """Create MQTT control panel"""
+    return pn.Column(
+        mqtt_status_text,
+        pn.Spacer(height=10),
+        pn.pane.Markdown("### 🎛️ Device Controls"),
+        pn.Row(
+            pn.Column(mqtt_fan_btn, mqtt_fan_status, sizing_mode="stretch_width"),
+            pn.Column(mqtt_pump_btn, mqtt_pump_status, sizing_mode="stretch_width"),
+            pn.Column(mqtt_light_btn, mqtt_light_status, sizing_mode="stretch_width"),
+            sizing_mode="stretch_width",
+        ),
+        pn.Spacer(height=10),
+        mqtt_log_box,
+        sizing_mode="stretch_width",
+    )
 
 
 def empty_readings_frame():
@@ -1068,6 +1228,7 @@ def create_dashboard():
             ("Charts", charts_panel),
             ("Statistics", stats_table),
             ("Recent Data", data_table),
+            ("🎛️ Device Control", pn.bind(lambda: create_mqtt_control_panel())),
             dynamic=True,
             sizing_mode="stretch_width",
         ),
