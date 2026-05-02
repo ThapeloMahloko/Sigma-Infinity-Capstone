@@ -69,6 +69,10 @@ smart_farm_dashboard.err.log
 subscriber.out.log
 subscriber.err.log
 
+# Database files
+*.db
+sensor_data.db
+
 # Flask stuff:
 instance/
 .webassets-cache
