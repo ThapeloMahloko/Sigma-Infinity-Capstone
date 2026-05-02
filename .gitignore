@@ -61,6 +61,13 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Project runtime artifacts
+*.db
+smart_farm_dashboard.out.log
+smart_farm_dashboard.err.log
+subscriber.out.log
+subscriber.err.log
+
 # Flask stuff:
 instance/
 .webassets-cache
