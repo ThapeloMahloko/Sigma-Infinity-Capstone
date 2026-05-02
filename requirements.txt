@@ -1,0 +1,10 @@
+holoviews==1.22.1
+hvplot==0.12.2
+pandas==3.0.2
+panel==1.8.10
+param==2.3.3
+plotly==6.7.0
+sqlalchemy>=2.0
+paho-mqtt==2.1.0
+kaleido==1.2.0
+pyyaml==6.0.3
