@@ -28,10 +28,6 @@ except ValueError:
 READING_COLUMNS = [
     "id",
     "timestamp",
-    "topic",
-    "sensor_name",
-    "value",
-    "raw_payload",
     "soil_moisture",
     "temperature",
     "humidity",
