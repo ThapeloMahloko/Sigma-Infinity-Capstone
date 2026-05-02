@@ -807,17 +807,9 @@ def create_recent_data_table(df, dark_mode):
             "ambient_light", "rainfall", "motion_detection", "ultrasonic_distance",
             "pump_status", "fan_status"
         ]
-        
-        # For each row, if sensor_name is missing, infer it from which column has a value
-        for idx, row in recent_df.iterrows():
-            if pd.isna(row.get("sensor_name")):
-                for col in sensor_columns:
-                    if col in recent_df.columns and not pd.isna(row[col]):
-                        recent_df.at[idx, "sensor_name"] = col
-                        break
     
     # Fill remaining NaN with "N/A" for UI display
-    recent_display = recent_df.fillna("N/A")
+    recent_display = recent_df.fillna("-")
     return pn.Column(
         pn.widgets.Tabulator(
             recent_display,
@@ -825,7 +817,7 @@ def create_recent_data_table(df, dark_mode):
             theme="midnight" if dark_mode else "bootstrap5",
             layout="fit_data_stretch",
             height=430,
-            sizing_mode="stretch_width",
+            sizing_mode="stretch_width"
         ),
         css_classes=["farm-table-wrap"],
         sizing_mode="stretch_width",

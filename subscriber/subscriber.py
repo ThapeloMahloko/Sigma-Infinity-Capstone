@@ -80,7 +80,7 @@ def parse_value(sensor_name: str, payload_text: str):
 
 def build_reading(topic: str, payload_text: str) -> SensorReading:
     suffix = topic_suffix(topic)
-    sensor_name, field_name = TOPIC_MAP.get(suffix, (suffix, suffix))
+    sensor_data, field_name = TOPIC_MAP.get(suffix, (suffix, suffix))
     parsed_value = parse_value(field_name, payload_text)
 
     reading_kwargs = {
