@@ -627,6 +627,17 @@ def recent_window(df, hours=24):
     return df[timestamps >= cutoff]
 
 
+def timeframe_to_hours(label):
+    mapping = {
+        "1H": 1,
+        "6H": 6,
+        "24H": 24,
+        "7D": 24 * 7,
+        "30D": 24 * 30,
+    }
+    return mapping.get(label, 24)
+
+
 def create_metric_card(label, value, unit, accent, icon):
     """Create a styled metric card."""
     return pn.pane.HTML(
@@ -751,21 +762,30 @@ def create_chart(series_df, y, title, color, dark_mode):
     )
 
 
-def create_charts_panel(last_24h, dark_mode):
+def create_charts_panel(series_df, dark_mode, timeframe_label):
     palette = PALETTES["dark" if dark_mode else "light"]
-    return pn.GridBox(
-        create_chart(last_24h, "temperature", "Temperature Trend (24h)", palette["danger"], dark_mode),
-        create_chart(last_24h, "humidity", "Humidity Trend (24h)", palette["info"], dark_mode),
-        create_chart(last_24h, "ambient_light", "Ambient Light (24h)", palette["warning"], dark_mode),
-        ncols=3,
+    return pn.Column(
+        pn.pane.HTML(
+            f'<p class="farm-section-label">Trend Window: {timeframe_label}</p>',
+            sizing_mode="stretch_width",
+        ),
+        pn.GridBox(
+            create_chart(series_df, "temperature", f"Temperature Trend ({timeframe_label})", palette["danger"], dark_mode),
+            create_chart(series_df, "humidity", f"Humidity Trend ({timeframe_label})", palette["info"], dark_mode),
+            create_chart(series_df, "ambient_light", f"Ambient Light ({timeframe_label})", palette["warning"], dark_mode),
+            ncols=3,
+            sizing_mode="stretch_width",
+        ),
         sizing_mode="stretch_width",
     )
 
 
 def create_stats_table(stats_df, dark_mode):
+    # Ensure missing values are presented clearly in the UI
+    display_df = stats_df.fillna("N/A")
     return pn.Column(
         pn.widgets.Tabulator(
-            stats_df,
+            display_df,
             disabled=True,
             show_index=False,
             theme="midnight" if dark_mode else "bootstrap5",
@@ -782,10 +802,29 @@ def create_recent_data_table(df, dark_mode):
     if df.empty or "timestamp" not in df:
         recent_df = empty_readings_frame()
     else:
-        recent_df = df.sort_values("timestamp", ascending=False).head(50)
+        recent_df = df.sort_values("timestamp", ascending=False).head(50).copy()
+    
+    # Batch-process rows to propagate sensor values to sensor_name if missing
+    if not recent_df.empty:
+        sensor_columns = [
+            "soil_moisture", "temperature", "humidity", "water_level",
+            "ambient_light", "rainfall", "motion_detection", "ultrasonic_distance",
+            "pump_status", "fan_status"
+        ]
+        
+        # For each row, if sensor_name is missing, infer it from which column has a value
+        for idx, row in recent_df.iterrows():
+            if pd.isna(row.get("sensor_name")):
+                for col in sensor_columns:
+                    if col in recent_df.columns and not pd.isna(row[col]):
+                        recent_df.at[idx, "sensor_name"] = col
+                        break
+    
+    # Fill remaining NaN with "N/A" for UI display
+    recent_display = recent_df.fillna("N/A")
     return pn.Column(
         pn.widgets.Tabulator(
-            recent_df,
+            recent_display,
             show_index=False,
             theme="midnight" if dark_mode else "bootstrap5",
             layout="fit_data_stretch",
@@ -917,6 +956,14 @@ def create_dashboard():
         css_classes=["farm-theme-toggle"],
         width=140,
     )
+    timeframe_selector = pn.widgets.RadioButtonGroup(
+        name="Chart range",
+        options=["1H", "6H", "24H", "7D", "30D"],
+        value="24H",
+        button_type="primary",
+        button_style="outline",
+        sizing_mode="fixed",
+    )
 
     theme_script = pn.pane.HTML(width=0, height=0, margin=0, sizing_mode="fixed")
 
@@ -948,7 +995,13 @@ def create_dashboard():
 
     theme_toggle.param.watch(on_toggle_theme, "value")
 
-    control_bar = pn.Row(pn.Spacer(), theme_toggle, css_classes=["farm-controls"], sizing_mode="stretch_width")
+    control_bar = pn.Row(
+        pn.Spacer(),
+        timeframe_selector,
+        theme_toggle,
+        css_classes=["farm-controls"],
+        sizing_mode="stretch_width",
+    )
 
     header = pn.bind(
         lambda df: create_header(latest_database_timestamp(df), len(df)),
@@ -969,9 +1022,14 @@ def create_dashboard():
         theme_toggle,
     )
     charts_panel = pn.bind(
-        lambda df, dark: create_charts_panel(recent_window(df, hours=24), dark),
+        lambda df, dark, range_label: create_charts_panel(
+            recent_window(df, hours=timeframe_to_hours(range_label)),
+            dark,
+            range_label,
+        ),
         state.param.df,
         theme_toggle,
+        timeframe_selector,
     )
     stats_table = pn.bind(
         lambda df, dark: create_stats_table(build_stats(df), dark),
