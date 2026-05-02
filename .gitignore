@@ -60,10 +60,10 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-*.db
 
 # Database files
 *.db
+sensor_data.db
 
 # Flask stuff:
 instance/
