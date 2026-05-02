@@ -14,6 +14,7 @@ def on_message(client, userdata, message):
     soil_moisture = 0.0
     temperature = 0.0
     session = Sql.Session()
+
     if message.topic == "TEMPERATURE":
         temperature = float(message.payload.decode("utf-8"))
     if message.topic == "HUMIDITY":
@@ -26,7 +27,7 @@ def on_message(client, userdata, message):
         water_level = float(message.payload.decode("utf-8"))
     if message.topic == "RAIN_VALUE":
         rainfall = float(message.payload.decode("utf-8"))       
-    
+
     # Add more topics as needed
     Data = SensorReading(
         temperature=temperature,
@@ -48,12 +49,20 @@ try:
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, "Smartphone")
     client.connect(mqttBroker, port=1883, keepalive=60)
 
-    client.loop_start()
     client.subscribe("TEMPERATURE")
     client.subscribe("HUMIDITY")
+    client.subscribe("SOIL_MOISTURE")
+    client.subscribe("LIGHT_LEVEL")
+    client.subscribe("WATER_LEVEL")
+    client.subscribe("RAIN_VALUE")
+
     client.on_message = on_message
+
+    # ⏱️ Run subscriber for 30 seconds only, then stop
+    client.loop_start()
     time.sleep(30)
     client.loop_stop()
+
 except ConnectionRefusedError:
     print("Connection refused. Check broker address and network.")
 except KeyboardInterrupt:
