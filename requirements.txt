@@ -1,0 +1,8 @@
+panel>=1.0
+bokeh>=3.4
+pandas>=2.0
+sqlalchemy>=2.0
+paho-mqtt>=1.7
+requests>=2.30
+qrcode[pil]>=7.4
+openpyxl>=3.1
