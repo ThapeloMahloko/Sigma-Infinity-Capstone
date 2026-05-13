@@ -9,7 +9,7 @@ from bokeh.models import ColumnDataSource, HoverTool
 import pandas as pd
 
 from config import SENSOR_LABELS, SENSOR_UNITS, COLOR_PRIMARY, COLOR_TEXT, COLOR_ACCENT, COLOR_ACCENT_LIGHT
-from Database import Session, SensorData
+from database import Session, SensorData
 from utils import build_stats_html, get_range_window
 
 # =========================================================
