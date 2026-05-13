@@ -32,6 +32,14 @@ htmlcov/
 .env
 .env.*
 
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.db-shm
+*.db-wal
+
 # Editor / OS files
 .vscode/
 .DS_Store
