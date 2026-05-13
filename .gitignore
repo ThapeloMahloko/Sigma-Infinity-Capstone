@@ -44,3 +44,13 @@ htmlcov/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Database files
+*.db
+*.db3
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+data/
+*/data/
