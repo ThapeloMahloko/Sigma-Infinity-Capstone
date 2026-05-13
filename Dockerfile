@@ -11,5 +11,5 @@ COPY . .
 
 EXPOSE 7860
 
-# Use the PORT environment variable set by Hugging Face Spaces at runtime.
-CMD ["sh", "-c", "python main.py --port ${PORT}"]
+# Start Panel app - main.py contains the full Smart Farm Dashboard
+CMD python -m panel serve main.py --port 7860 --allow-websocket-origin="*"

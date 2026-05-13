@@ -2,10 +2,12 @@
 # CONFIGURATION
 # =========================================================
 
+import os
+
 # MQTT CONFIG
-MQTT_BROKER = "broker.hivemq.com"
-MQTT_PORT = 1883
-MQTT_TOPIC = "sitech/farm/#"
+MQTT_BROKER = os.getenv("MQTT_BROKER", "broker.hivemq.com")
+MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
+MQTT_TOPIC = os.getenv("MQTT_TOPIC", "sitech/farm/#")
 
 # DATABASE
 DATABASE_URL = "sqlite:///smart_farm.db"

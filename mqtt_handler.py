@@ -81,10 +81,16 @@ def schedule_ui_refresh():
 # =========================================================
 
 def init_mqtt():
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.connect(MQTT_BROKER, MQTT_PORT, 60)
-    client.loop_start()
+    try:
+        client.on_connect = on_connect
+        client.on_message = on_message
+        client.connect(MQTT_BROKER, MQTT_PORT, 60)
+        client.loop_start()
+        print(f"✓ MQTT connected to {MQTT_BROKER}:{MQTT_PORT}")
+    except Exception as e:
+        print(f"⚠ MQTT connection failed: {e}")
+        print("  App will continue with default sensor values.")
+        print("  To enable MQTT, set MQTT_BROKER env variable or configure credentials.")
 
 def send_mqtt(topic, message):
     client.publish(topic, message)

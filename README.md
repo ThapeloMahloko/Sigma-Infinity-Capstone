@@ -1,3 +1,12 @@
+---
+title: Smart Farm Dashboard
+emoji: 🌱
+colorFrom: green
+colorTo: blue
+sdk: docker
+pinned: false
+---
+
 # Smart Farm Dashboard - Modular Structure
 
 This is a refactored version of the monolithic smart farm dashboard into a modular, maintainable architecture.

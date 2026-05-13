@@ -39,7 +39,11 @@ def _detect_port():
 PORT = _detect_port()
 
 def open_browser():
-    webbrowser.open_new(f"http://localhost:{PORT}")
+    # Skip opening browser in headless/container environments
+    try:
+        webbrowser.open_new(f"http://localhost:{PORT}")
+    except Exception as e:
+        print(f"ℹ Browser auto-open skipped: {e}")
 
 pn.state.onload(open_browser)
 
@@ -138,6 +142,12 @@ dashboard.servable()
 # INITIALIZATION & SERVER START
 # =========================================================
 
+# Initialize MQTT early (before servable is called)
+try:
+    init_mqtt()
+except Exception as e:
+    print(f"⚠ MQTT init warning: {e}")
+
 def register_session_doc():
     doc = pn.state.curdoc
     if doc is None:
@@ -174,7 +184,6 @@ def app():
     return dashboard
 
 if __name__ == "__main__":
-    init_mqtt()
     pn.serve(
         app,
         port=PORT,
