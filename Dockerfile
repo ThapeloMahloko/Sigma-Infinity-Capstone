@@ -1,7 +1,6 @@
 FROM python:3.11-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PORT=7860
 
 WORKDIR /app
 
@@ -10,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5006
+EXPOSE 7860
 
-CMD ["python", "main.py"]
+# Use the PORT environment variable set by Hugging Face Spaces at runtime.
+CMD ["sh", "-c", "python main.py --port ${PORT}"]

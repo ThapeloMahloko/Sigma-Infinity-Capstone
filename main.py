@@ -2,6 +2,8 @@
 # SMART FARM DASHBOARD - MAIN ENTRY POINT
 # =========================================================
 
+import os
+import argparse
 import panel as pn
 import webbrowser
 
@@ -18,8 +20,26 @@ from pages.telegram import telegram_page
 # AUTO OPEN BROWSER
 # =========================================================
 
+def _detect_port():
+    # Priority: --port CLI arg > PORT env var > PANEL_PORT from config
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--port", type=int, help="port to serve on")
+    args, _ = parser.parse_known_args()
+    if args.port:
+        return args.port
+    env = os.environ.get("PORT")
+    if env:
+        try:
+            return int(env)
+        except ValueError:
+            pass
+    return PANEL_PORT
+
+# resolved port used by the Docker image / Hugging Face Spaces
+PORT = _detect_port()
+
 def open_browser():
-    webbrowser.open_new(f"http://localhost:{PANEL_PORT}")
+    webbrowser.open_new(f"http://localhost:{PORT}")
 
 pn.state.onload(open_browser)
 
@@ -157,7 +177,7 @@ if __name__ == "__main__":
     init_mqtt()
     pn.serve(
         app,
-        port=PANEL_PORT,
+        port=PORT,
         show=True,
         title=PANEL_TITLE
     )
