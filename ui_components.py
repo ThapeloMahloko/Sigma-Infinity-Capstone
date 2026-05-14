@@ -58,32 +58,55 @@ def get_current_colors():
         }
 
 # =========================================================
-# CSS STYLING
+# CSS STYLING - Both Themes Included
 # =========================================================
 
-def apply_theme_css():
-    """Apply theme CSS based on current mode"""
-    colors = get_current_colors()
-    accent_opacity_dark = "rgba(212, 165, 116, 0.22)" if theme_state.mode == "dark" else "rgba(139, 111, 71, 0.15)"
-    accent_opacity_light = "rgba(212, 165, 116, 0.1)" if theme_state.mode == "dark" else "rgba(139, 111, 71, 0.08)"
-    
-    css = f"""
+# Dark mode CSS (default)
+dark_css = f"""
+body.theme-dark {{
+    --sf-bg: {COLOR_BACKGROUND};
+    --sf-surface: {COLOR_PRIMARY};
+    --sf-surface-2: {COLOR_SECONDARY};
+    --sf-accent: {COLOR_ACCENT};
+    --sf-accent-soft: {COLOR_ACCENT_LIGHT};
+    --sf-text: {COLOR_TEXT};
+    --sf-text-muted: {COLOR_TEXT_MUTED};
+    --sf-border: {COLOR_BORDER};
+}}
+"""
+
+# Light mode CSS
+light_css = f"""
+body.theme-light {{
+    --sf-bg: {COLOR_BACKGROUND_LIGHT};
+    --sf-surface: {COLOR_PRIMARY_LIGHT};
+    --sf-surface-2: {COLOR_SECONDARY_LIGHT};
+    --sf-accent: {COLOR_ACCENT_LIGHT_MODE};
+    --sf-accent-soft: {COLOR_ACCENT_LIGHT_MODE_LIGHT};
+    --sf-text: {COLOR_TEXT_LIGHT};
+    --sf-text-muted: {COLOR_TEXT_MUTED_LIGHT};
+    --sf-border: {COLOR_BORDER_LIGHT};
+}}
+"""
+
+# Shared CSS (both modes)
+shared_css = f"""
 :root {{
-    --sf-bg: {colors['bg']};
-    --sf-surface: {colors['surface']};
-    --sf-surface-2: {colors['surface_2']};
-    --sf-accent: {colors['accent']};
-    --sf-accent-soft: {colors['accent_soft']};
-    --sf-text: {colors['text']};
-    --sf-text-muted: {colors['text_muted']};
-    --sf-border: {colors['border']};
+    --sf-bg: {COLOR_BACKGROUND};
+    --sf-surface: {COLOR_PRIMARY};
+    --sf-surface-2: {COLOR_SECONDARY};
+    --sf-accent: {COLOR_ACCENT};
+    --sf-accent-soft: {COLOR_ACCENT_LIGHT};
+    --sf-text: {COLOR_TEXT};
+    --sf-text-muted: {COLOR_TEXT_MUTED};
+    --sf-border: {COLOR_BORDER};
 }}
 
 html,
 body,
 .bk-root {{
     background:
-        radial-gradient(circle at top, {accent_opacity_dark}, transparent 28%),
+        radial-gradient(circle at top, rgba(212, 165, 116, 0.12), transparent 28%),
         linear-gradient(180deg, var(--sf-bg) 0%, var(--sf-bg) 75%);
     color: var(--sf-text);
 }}
@@ -144,7 +167,7 @@ select.bk-input option {{
 .bk-btn-group .bk-btn {{
     border-radius: 999px !important;
     border: 1px solid var(--sf-border) !important;
-    background: linear-gradient(135deg, {accent_opacity_dark}, {accent_opacity_light}) !important;
+    background: linear-gradient(135deg, rgba(212, 165, 116, 0.22), rgba(212, 165, 116, 0.1)) !important;
     color: var(--sf-text) !important;
 }}
 
@@ -163,19 +186,17 @@ select.bk-input option {{
     border-bottom-color: var(--sf-accent) !important;
 }}
 """
-    
-    return css
 
-# Apply initial theme
-pn.config.raw_css.append(apply_theme_css())
+pn.config.raw_css.append(dark_css + light_css + shared_css)
 
-# Update CSS when theme changes
-def update_theme_css():
-    # Re-apply CSS by clearing and re-adding
-    pn.config.raw_css.clear()
-    pn.config.raw_css.append(apply_theme_css())
+# Watch for theme changes and refresh cards
+def on_theme_change(*args):
+    try:
+        refresh_cards()
+    except:
+        pass
 
-theme_state.param.watch(lambda *args: update_theme_css(), "mode")
+theme_state.param.watch(on_theme_change, "mode")
 
 # =========================================================
 # LIVE DATA STORAGE
@@ -285,41 +306,26 @@ refresh_cards()
 
 source = ColumnDataSource(data=dict(x=[], y=[]))
 
-def create_plot():
-    """Create plot with current theme colors"""
-    colors = get_current_colors()
-    
-    plot = figure(
-        height=400,
-        sizing_mode="stretch_width",
-        x_axis_type="datetime",
-        background_fill_color=colors["surface"],
-        border_fill_color=colors["surface"]
-    )
+colors = get_current_colors()
 
-    plot.line(x="x", y="y", source=source, line_width=3, color=colors["accent"])
-    plot.circle(x="x", y="y", source=source, size=8, color=colors["accent"])
+plot = figure(
+    height=400,
+    sizing_mode="stretch_width",
+    x_axis_type="datetime",
+    background_fill_color=colors["surface"],
+    border_fill_color=colors["surface"]
+)
 
-    plot.title.text = "Live Sensor Trends"
-    plot.title.text_color = colors["text"]
-    plot.xaxis.major_label_text_color = colors["text"]
-    plot.yaxis.major_label_text_color = colors["text"]
+plot.line(x="x", y="y", source=source, line_width=3, color=colors["accent"])
+plot.circle(x="x", y="y", source=source, size=8, color=colors["accent"])
 
-    hover = HoverTool(tooltips=[("Time", "@x{%F %T}"), ("Value", "@y")], formatters={"@x": "datetime"})
-    plot.add_tools(hover)
-    
-    return plot
+plot.title.text = "Live Sensor Trends"
+plot.title.text_color = colors["text"]
+plot.xaxis.major_label_text_color = colors["text"]
+plot.yaxis.major_label_text_color = colors["text"]
 
-plot = create_plot()
-
-def update_plot_theme():
-    """Update plot colors when theme changes"""
-    global plot
-    # Recreate the plot with new colors
-    plot = create_plot()
-
-# Watch for theme changes and update plot
-theme_state.param.watch(lambda *args: update_plot_theme(), "mode")
+hover = HoverTool(tooltips=[("Time", "@x{%F %T}"), ("Value", "@y")], formatters={"@x": "datetime"})
+plot.add_tools(hover)
 
 # =========================================================
 # SENSOR SELECTOR

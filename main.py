@@ -45,7 +45,17 @@ def open_browser():
     except Exception as e:
         print(f"ℹ Browser auto-open skipped: {e}")
 
+def init_theme():
+    """Initialize theme class on page load"""
+    doc = pn.state.curdoc
+    if doc:
+        initial_mode = theme_state.mode
+        script = f"""
+        document.body.classList.add('theme-{initial_mode}');
+        """
+
 pn.state.onload(open_browser)
+pn.state.onload(init_theme)
 
 # =========================================================
 # NAVIGATION
@@ -88,7 +98,21 @@ telegram_btn = pn.widgets.Button(name="🤖 Telegram Bot")
 
 # Theme toggle button
 def toggle_theme(event=None):
-    theme_state.mode = "light" if theme_state.mode == "dark" else "dark"
+    new_mode = "light" if theme_state.mode == "dark" else "dark"
+    theme_state.mode = new_mode
+    
+    # Update the body class to reflect the theme
+    doc = pn.state.curdoc
+    if doc:
+        script = f"""
+        document.body.className = document.body.className.replace(/theme-(dark|light)/g, '');
+        document.body.classList.add('theme-{new_mode}');
+        """
+        doc.add_next_tick_callback(lambda: None)
+    
+    # Refresh cards with new colors
+    from ui_components import refresh_cards
+    refresh_cards()
 
 theme_btn = pn.widgets.Button(
     name="🌙 Dark Mode",
