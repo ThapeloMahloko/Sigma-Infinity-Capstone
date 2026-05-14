@@ -24,10 +24,18 @@ except:
 # =========================================================
 
 def send_telegram_message(message):
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        print("TELEGRAM NOT CONFIGURED: missing token or chat id")
+        return
+
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         data = {
             "chat_id": TELEGRAM_CHAT_ID,
+# =========================================================
+# Resolve bot username and optionally generate a QR code
+# If TELEGRAM_BOT_USERNAME is empty, call getMe to fetch the username at runtime.
+
             "text": message
         }
         requests.post(url, data=data)
@@ -39,7 +47,7 @@ def send_telegram_message(message):
 # TELEGRAM WIDGETS
 # =========================================================
 
-telegram_result = pn.pane.Markdown("No messages sent yet.")
+telegram_link = f"https://t.me/{bot_username}" if bot_username else None
 
 telegram_btn_send = pn.widgets.Button(
     name="📨 Send Test Message",
@@ -66,14 +74,14 @@ telegram_page = pn.Column(
 
     pn.Row(
         pn.Column(
-            pn.pane.Markdown("""
-            ## Telegram Setup
+                    pn.pane.Markdown("""
+                    ## Telegram Setup
 
-            1. Open Telegram
-            2. Scan QR code
-            3. Start the bot
-            4. Receive live alerts
-            """),
+                    1. Open Telegram
+                    2. Scan QR code (if available)
+                    3. Start the bot
+                    4. Receive live alerts
+                    """),
 
             telegram_btn_send,
             telegram_result,
@@ -81,7 +89,7 @@ telegram_page = pn.Column(
         ),
 
         pn.Column(
-            pn.pane.PNG("telegram_qr.png", width=300)
+                    pn.pane.PNG("telegram_qr.png", width=300) if telegram_link and os.path.exists("telegram_qr.png") else pn.pane.Markdown("QR code not available."),
         )
     )
 )
