@@ -9,7 +9,7 @@ import webbrowser
 
 from config import PANEL_PORT, PANEL_TITLE
 from mqtt_handler import init_mqtt, set_active_doc
-from ui_components import hero, refresh_cards, refresh_graph
+from ui_components import hero, refresh_cards, refresh_graph, theme_state
 from pages.dashboard import dashboard_page
 from pages.analytics import analytics_page
 from pages.export import export_page
@@ -86,6 +86,23 @@ export_btn = pn.widgets.Button(name="🗄 Data Export")
 controls_btn = pn.widgets.Button(name="⚙ Controls")
 telegram_btn = pn.widgets.Button(name="🤖 Telegram Bot")
 
+# Theme toggle button
+def toggle_theme(event=None):
+    theme_state.mode = "light" if theme_state.mode == "dark" else "dark"
+
+theme_btn = pn.widgets.Button(
+    name="🌙 Dark Mode",
+    button_type="primary",
+    width=200
+)
+theme_btn.on_click(toggle_theme)
+
+# Update button text when theme changes
+def update_theme_btn_label(*args):
+    theme_btn.name = "☀️ Light Mode" if theme_state.mode == "dark" else "🌙 Dark Mode"
+
+theme_state.param.watch(update_theme_btn_label, "mode")
+
 dashboard_btn.on_click(show_dashboard)
 analytics_btn.on_click(show_analytics)
 export_btn.on_click(show_export)
@@ -108,6 +125,9 @@ sidebar = pn.Column(
     export_btn,
     controls_btn,
     telegram_btn,
+
+    pn.Spacer(height=20),
+    theme_btn,
 
     pn.Spacer(height=30),
 
