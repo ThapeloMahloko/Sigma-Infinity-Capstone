@@ -8,7 +8,7 @@ from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, HoverTool
 import pandas as pd
 
-from config import SENSOR_LABELS, SENSOR_UNITS, COLOR_PRIMARY, COLOR_TEXT, COLOR_ACCENT, COLOR_ACCENT_LIGHT
+from config import SENSOR_LABELS, SENSOR_UNITS, COLOR_PRIMARY, COLOR_TEXT, COLOR_TEXT_MUTED, COLOR_ACCENT, COLOR_ACCENT_LIGHT
 from database import Session, SensorData
 from utils import build_stats_html, get_range_window
 
@@ -179,10 +179,10 @@ pn.state.onload(_initialize_analytics_view)
 analytics_page = pn.Column(
     pn.pane.HTML("""
     <div class='hero'>
-    <div style='font-size:14px;letter-spacing:4px;color:#8fb8aa;'>ANALYTICS</div>
+    <div style='font-size:14px;letter-spacing:4px;color:%s;'>ANALYTICS</div>
     <div style='font-size:52px;font-weight:800;color:white;margin-top:10px;'>Historical Analytics</div>
     </div>
-    """),
+    """ % COLOR_TEXT_MUTED),
 
     pn.Column(
         pn.Row(

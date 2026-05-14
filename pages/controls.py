@@ -3,6 +3,7 @@
 # =========================================================
 
 import panel as pn
+from config import COLOR_TEXT_MUTED
 from mqtt_handler import send_mqtt
 
 # =========================================================
@@ -93,10 +94,10 @@ feed_close_btn.on_click(lambda e: send_mqtt("sitech/farm/control/feed", "CLOSE")
 controls_page = pn.Column(
     pn.pane.HTML("""
     <div class='hero'>
-    <div style='font-size:14px;letter-spacing:4px;color:#8fb8aa;'>CONTROL CENTER</div>
+    <div style='font-size:14px;letter-spacing:4px;color:%s;'>CONTROL CENTER</div>
     <div style='font-size:52px;font-weight:800;color:white;margin-top:10px;'>Farm Controls</div>
     </div>
-    """),
+    """ % COLOR_TEXT_MUTED),
 
     pn.Column(
         pn.pane.Markdown("## Fan Controls"),

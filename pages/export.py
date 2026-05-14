@@ -337,10 +337,10 @@ pn.state.onload(_initialize_export_preview)
 export_page = pn.Column(
     pn.pane.HTML("""
     <div class='hero'>
-    <div style='font-size:14px;letter-spacing:4px;color:#8fb8aa;'>DATA EXPORT</div>
+    <div style='font-size:14px;letter-spacing:4px;color:%s;'>DATA EXPORT</div>
     <div style='font-size:52px;font-weight:800;color:white;margin-top:10px;'>Historical Data</div>
     </div>
-    """),
+    """ % COLOR_TEXT_MUTED),
 
     pn.Column(
         pn.Row(

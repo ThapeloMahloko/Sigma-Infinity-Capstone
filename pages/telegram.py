@@ -5,7 +5,7 @@
 import panel as pn
 import requests
 import qrcode
-from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_BOT_USERNAME
+from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_BOT_USERNAME, COLOR_TEXT_MUTED
 
 # =========================================================
 # QR CODE GENERATION
@@ -59,10 +59,10 @@ telegram_btn_send.on_click(send_test)
 telegram_page = pn.Column(
     pn.pane.HTML("""
     <div class='hero'>
-    <div style='font-size:14px;letter-spacing:4px;color:#8fb8aa;'>TELEGRAM BOT</div>
+    <div style='font-size:14px;letter-spacing:4px;color:%s;'>TELEGRAM BOT</div>
     <div style='font-size:52px;font-weight:800;color:white;margin-top:10px;'>Smart Farm Bot</div>
     </div>
-    """),
+    """ % COLOR_TEXT_MUTED),
 
     pn.Row(
         pn.Column(

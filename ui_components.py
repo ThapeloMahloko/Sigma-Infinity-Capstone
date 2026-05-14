@@ -8,8 +8,8 @@ from bokeh.models import ColumnDataSource, HoverTool
 from collections import deque
 from config import (
     SENSOR_LABELS, SENSOR_UNITS, MAX_POINTS,
-    COLOR_PRIMARY, COLOR_ACCENT, COLOR_ACCENT_LIGHT,
-    COLOR_TEXT, COLOR_TEXT_MUTED
+    COLOR_PRIMARY, COLOR_SECONDARY, COLOR_ACCENT, COLOR_ACCENT_LIGHT,
+    COLOR_TEXT, COLOR_TEXT_MUTED, COLOR_BORDER, COLOR_BACKGROUND
 )
 
 # =========================================================
@@ -22,56 +22,101 @@ pn.extension("tabulator", sizing_mode="stretch_width")
 # CSS STYLING
 # =========================================================
 
-pn.config.raw_css.append("""
+pn.config.raw_css.append(f"""
+:root {{
+    --sf-bg: {COLOR_BACKGROUND};
+    --sf-surface: {COLOR_PRIMARY};
+    --sf-surface-2: {COLOR_SECONDARY};
+    --sf-accent: {COLOR_ACCENT};
+    --sf-accent-soft: {COLOR_ACCENT_LIGHT};
+    --sf-text: {COLOR_TEXT};
+    --sf-text-muted: {COLOR_TEXT_MUTED};
+    --sf-border: {COLOR_BORDER};
+}}
 
-body {
-    background-color: #071411;
-}
+html,
+body,
+.bk-root {{
+    background:
+        radial-gradient(circle at top, rgba(79, 209, 165, 0.16), transparent 28%),
+        linear-gradient(180deg, var(--sf-bg) 0%, #050b11 75%);
+    color: var(--sf-text);
+}}
 
-.sidebar {
-    background: #0b1f1a;
-    border-right: 1px solid #16352d;
-    padding: 20px;
-}
+body {{
+    background-color: var(--sf-bg);
+}}
 
-.hero {
-    background: linear-gradient(135deg,#0d2f25,#071411);
-    border-radius: 24px;
-    padding: 35px;
+.sidebar {{
+    background: linear-gradient(180deg, rgba(17, 35, 52, 0.96), rgba(7, 17, 26, 0.98));
+    border-right: 1px solid var(--sf-border);
+    padding: 22px;
+    box-shadow: inset -1px 0 0 rgba(255,255,255,0.03);
+}}
+
+.hero {{
+    background: linear-gradient(135deg, rgba(17, 35, 52, 0.95), rgba(7, 17, 26, 0.92));
+    border-radius: 28px;
+    padding: 38px;
     margin-bottom: 20px;
-}
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}}
 
-.sensor-card {
-    background: #0c1f1a;
+.sensor-card,
+.section-box {{
+    background: linear-gradient(180deg, rgba(17, 35, 52, 0.95), rgba(10, 20, 30, 0.97));
     border-radius: 18px;
     padding: 20px;
     border: 1px solid rgba(255,255,255,0.06);
-}
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}}
 
-.section-box {
-    background: #0c1f1a;
-    border-radius: 18px;
-    padding: 20px;
+.section-box {{
     margin-top: 20px;
-}
+}}
 
-h1,h2,h3,p,div {
-    color:white;
-}
+h1, h2, h3, p, div {{
+    color: var(--sf-text);
+}}
 
 .bk-input,
 .bk-input-group .bk-input,
-select.bk-input {
-    background-color: #0c1f1a !important;
-    color: #ffffff !important;
-    border: 1px solid #16352d !important;
-}
+select.bk-input {{
+    background-color: rgba(10, 20, 30, 0.96) !important;
+    color: var(--sf-text) !important;
+    border: 1px solid var(--sf-border) !important;
+    border-radius: 12px !important;
+}}
 
 .bk-input option,
-select.bk-input option {
-    background-color: #0c1f1a;
-    color: #ffffff;
-}
+select.bk-input option {{
+    background-color: var(--sf-surface);
+    color: var(--sf-text);
+}}
+
+.bk-btn,
+.bk-btn-group .bk-btn {{
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    background: linear-gradient(135deg, rgba(79, 209, 165, 0.22), rgba(79, 209, 165, 0.1)) !important;
+    color: var(--sf-text) !important;
+}}
+
+.bk-btn:hover,
+.bk-btn-group .bk-btn:hover {{
+    border-color: rgba(146, 230, 199, 0.42) !important;
+    box-shadow: 0 0 0 1px rgba(146, 230, 199, 0.15), 0 10px 24px rgba(0, 0, 0, 0.18);
+}}
+
+.bk-tab {{
+    color: var(--sf-text-muted) !important;
+}}
+
+.bk-tab.bk-active {{
+    color: var(--sf-text) !important;
+    border-bottom-color: var(--sf-accent) !important;
+}}
 
 """)
 
@@ -117,56 +162,56 @@ def refresh_cards():
 
     temp_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:#8fb8aa;'>TEMPERATURE</div>
+        <div style='font-size:14px;color:{COLOR_TEXT_MUTED};'>TEMPERATURE</div>
         <div style='font-size:48px;font-weight:bold;'>{values['temperature']:.1f}°C</div>
     </div>
     """
 
     humidity_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:#8fb8aa;'>HUMIDITY</div>
+        <div style='font-size:14px;color:{COLOR_TEXT_MUTED};'>HUMIDITY</div>
         <div style='font-size:48px;font-weight:bold;'>{values['humidity']:.1f}%</div>
     </div>
     """
 
     soil_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:#8fb8aa;'>SOIL MOISTURE</div>
+        <div style='font-size:14px;color:{COLOR_TEXT_MUTED};'>SOIL MOISTURE</div>
         <div style='font-size:48px;font-weight:bold;'>{values['soil']:.1f}%</div>
     </div>
     """
 
     water_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:#8fb8aa;'>WATER LEVEL</div>
+        <div style='font-size:14px;color:{COLOR_TEXT_MUTED};'>WATER LEVEL</div>
         <div style='font-size:48px;font-weight:bold;'>{values['water']:.1f}%</div>
     </div>
     """
 
     light_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:#8fb8aa;'>LIGHT</div>
+        <div style='font-size:14px;color:{COLOR_TEXT_MUTED};'>LIGHT</div>
         <div style='font-size:48px;font-weight:bold;'>{values['light']:.1f}%</div>
     </div>
     """
 
     rain_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:#8fb8aa;'>RAIN</div>
+        <div style='font-size:14px;color:{COLOR_TEXT_MUTED};'>RAIN</div>
         <div style='font-size:48px;font-weight:bold;'>{values['rain']:.1f}%</div>
     </div>
     """
 
     fan_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:#8fb8aa;'>FAN SPEED</div>
+        <div style='font-size:14px;color:{COLOR_TEXT_MUTED};'>FAN SPEED</div>
         <div style='font-size:48px;font-weight:bold;'>{int(values['fan_speed'])}</div>
     </div>
     """
 
     status_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:#8fb8aa;'>SYSTEM STATUS</div>
+        <div style='font-size:14px;color:{COLOR_TEXT_MUTED};'>SYSTEM STATUS</div>
         <div style='font-size:20px;font-weight:600;margin-top:8px;'>
             Alarm: {alarm_status} | Feeder: {feed_status} | Motion: {motion_status}
         </div>
@@ -252,8 +297,8 @@ sensor_selector.param.watch(lambda event: schedule_graph_refresh(), "value")
 
 hero = pn.pane.HTML("""
 <div class='hero'>
-<div style='font-size:14px;letter-spacing:4px;color:#8fb8aa;'>LIVE SMART AGRICULTURE</div>
-<div style='font-size:56px;font-weight:800;color:white;margin-top:10px;'>Smart Farm Dashboard</div>
-<div style='font-size:18px;color:#b8d1c8;margin-top:15px;'>Real-time monitoring and intelligent automation</div>
+<div style='font-size:14px;letter-spacing:4px;color:%s;'>LIVE SMART AGRICULTURE</div>
+<div style='font-size:56px;font-weight:800;color:%s;margin-top:10px;'>Smart Farm Dashboard</div>
+<div style='font-size:18px;color:%s;margin-top:15px;'>Real-time monitoring and intelligent automation</div>
 </div>
-""")
+""" % (COLOR_TEXT_MUTED, COLOR_TEXT, COLOR_TEXT_MUTED))
