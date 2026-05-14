@@ -25,12 +25,10 @@ pn.extension("tabulator", sizing_mode="stretch_width")
 # THEME STATE
 # =========================================================
 
-class ThemeState(pn.reactive.Reactive):
-    mode = pn.reactive.Reactive.param.Selector(
-        default="dark",
-        objects=["dark", "light"],
-        doc="Theme mode: 'dark' or 'light'"
-    )
+import param
+
+class ThemeState(param.Parameterized):
+    mode = param.Selector(default="dark", objects=["dark", "light"], doc="Theme mode")
 
 theme_state = ThemeState()
 
