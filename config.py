@@ -13,11 +13,14 @@ MQTT_TOPIC = os.getenv("MQTT_TOPIC", "sitech/farm/#")
 DATABASE_URL = "sqlite:///smart_farm.db"
 
 # TELEGRAM CONFIG
-# Integrated Telegram bot token and chat id provided by the user
-TELEGRAM_BOT_TOKEN = "8676954233:AAFyd_aFSAqWfq5UATmgL2zV_6UCEwX4Qm8"
-TELEGRAM_CHAT_ID = "770459334"
+# Read Telegram credentials from environment variables so they can be
+# supplied securely via Hugging Face Space Secrets or process env.
+# Example (in Space UI -> Settings -> Secrets):
+# TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 # Leave username empty so the app will query getMe at runtime and resolve it
-TELEGRAM_BOT_USERNAME = ""
+TELEGRAM_BOT_USERNAME = os.getenv("TELEGRAM_BOT_USERNAME", "")
 
 # PANEL CONFIG
 PANEL_PORT = 5006
