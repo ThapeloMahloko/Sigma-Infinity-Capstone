@@ -47,6 +47,10 @@ telegram_btn_send = pn.widgets.Button(
     button_type="primary"
 )
 
+# Status indicator and check button
+telegram_status = pn.pane.Markdown("")
+telegram_check_btn = pn.widgets.Button(name="Check Bot", button_type="primary")
+
 def send_telegram_message(message: str):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         print("TELEGRAM NOT CONFIGURED: missing token or chat id")
@@ -73,6 +77,25 @@ def send_telegram_message(message: str):
 
 def send_test(event):
     send_telegram_message("✅ Smart Farm Connected")
+
+
+def check_bot(event=None):
+    if not TELEGRAM_BOT_TOKEN:
+        telegram_status.object = "Not configured: TELEGRAM_BOT_TOKEN missing."
+        return
+    try:
+        resp = requests.get(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getMe", timeout=5)
+        data = resp.json()
+        if data.get("ok") and data.get("result"):
+            user = data["result"].get("username") or data["result"].get("first_name")
+            telegram_status.object = f"Bot reachable: @{user}"
+        else:
+            telegram_status.object = f"getMe failed: {data}"
+    except Exception as e:
+        telegram_status.object = f"Error contacting Telegram: {e}"
+
+
+telegram_check_btn.on_click(check_bot)
 
 
 telegram_btn_send.on_click(send_test)
