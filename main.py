@@ -48,100 +48,7 @@ def open_browser():
         print(f"ℹ Browser auto-open skipped: {e}")
 
 
-THEME_VARS = {
-        "dark": {
-                "--sf-bg": "#071411",
-                "--sf-surface": "#0c1f1a",
-                "--sf-surface-2": "#0b1f1a",
-                "--sf-accent": "#42d392",
-                "--sf-accent-soft": "#7fe8b8",
-                "--sf-text": "#ffffff",
-                "--sf-text-muted": "#8fb8aa",
-                "--sf-border": "#16352d",
-                "--sf-hero-start": "#0d2f25",
-        },
-        "light": {
-                "--sf-bg": "#f0f5f3",
-                "--sf-surface": "#eaf2ef",
-                "--sf-surface-2": "#e0ece8",
-                "--sf-accent": "#1a6b52",
-                "--sf-accent-soft": "#4a7a6a",
-                "--sf-text": "#0d2015",
-                "--sf-text-muted": "#7aaa98",
-                "--sf-border": "#b8d4cc",
-                "--sf-hero-start": "#d0e8e0",
-        },
-}
-
-
-def _theme_js(mode: str) -> str:
-    variables = json.dumps(THEME_VARS[mode])
-    return f"""
-(function(){{
-    const vars = {variables};
-    const root = document.documentElement;
-    const body = document.body;
-    for (const [name, value] of Object.entries(vars)) {{
-        root.style.setProperty(name, value);
-        if (body) body.style.setProperty(name, value);
-    }}
-    const background = vars['--sf-bg'];
-    const foreground = vars['--sf-text'];
-    root.style.backgroundColor = background;
-    root.style.color = foreground;
-    if (body) {{
-        body.classList.remove('theme-dark', 'theme-light');
-        body.classList.add('theme-{mode}');
-        body.style.backgroundColor = background;
-        body.style.color = foreground;
-    }}
-    document.querySelectorAll('body > div').forEach((el) => {{
-        el.style.backgroundColor = background;
-        el.style.color = foreground;
-    }});
-}})();
-"""
-
-
-def _toggle_theme_js() -> str:
-    dark_variables = json.dumps(THEME_VARS["dark"])
-    light_variables = json.dumps(THEME_VARS["light"])
-    return f"""
-(function(){{
-    const body = document.body;
-    const root = document.documentElement;
-    const isDark = !!(body && body.classList.contains('theme-dark'));
-    const vars = isDark ? {light_variables} : {dark_variables};
-    for (const [name, value] of Object.entries(vars)) {{
-        root.style.setProperty(name, value);
-        if (body) body.style.setProperty(name, value);
-    }}
-    const background = vars['--sf-bg'];
-    const foreground = vars['--sf-text'];
-    root.style.backgroundColor = background;
-    root.style.color = foreground;
-    if (body) {{
-        body.classList.remove('theme-dark', 'theme-light');
-        body.classList.add(isDark ? 'theme-light' : 'theme-dark');
-        body.style.backgroundColor = background;
-        body.style.color = foreground;
-    }}
-    document.querySelectorAll('body > div').forEach((el) => {{
-        el.style.backgroundColor = background;
-        el.style.color = foreground;
-    }});
-}})();
-"""
-
-
-def init_theme():
-    """Initialize theme class on page load"""
-    doc = pn.state.curdoc
-    if doc:
-        doc.js_on_event("document_ready", CustomJS(code=_theme_js("dark")))
-
 pn.state.onload(open_browser)
-pn.state.onload(init_theme)
 
 # =========================================================
 # NAVIGATION
@@ -182,13 +89,7 @@ export_btn = pn.widgets.Button(name="🗄 Data Export")
 controls_btn = pn.widgets.Button(name="⚙ Controls")
 telegram_btn = pn.widgets.Button(name="🤖 Telegram Bot")
 
-# Theme toggle button
-theme_btn = pn.widgets.Button(
-    name="🌙 Dark Mode",
-    button_type="primary",
-    width=200
-)
-theme_btn.js_on_click(code=_toggle_theme_js())
+
 
 dashboard_btn.on_click(show_dashboard)
 analytics_btn.on_click(show_analytics)
@@ -213,8 +114,7 @@ sidebar = pn.Column(
     controls_btn,
     telegram_btn,
 
-    pn.Spacer(height=20),
-    theme_btn,
+
 
     pn.Spacer(height=30),
 

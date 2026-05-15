@@ -21,175 +21,77 @@ from config import (
 
 pn.extension("tabulator", sizing_mode="stretch_width")
 
-# =========================================================
-# THEME STATE
-# =========================================================
-
-import param
-
-class ThemeState(param.Parameterized):
-    mode = param.Selector(default="dark", objects=["dark", "light"], doc="Theme mode")
-
-theme_state = ThemeState()
-
 def get_current_colors():
-    """Return colors based on current theme mode"""
-    if theme_state.mode == "light":
-        return {
-            "bg": COLOR_BACKGROUND_LIGHT,
-            "surface": COLOR_PRIMARY_LIGHT,
-            "surface_2": COLOR_SECONDARY_LIGHT,
-            "accent": COLOR_ACCENT_LIGHT_MODE,
-            "accent_soft": COLOR_ACCENT_LIGHT_MODE_LIGHT,
-            "text": COLOR_TEXT_LIGHT,
-            "text_muted": COLOR_TEXT_MUTED_LIGHT,
-            "border": COLOR_BORDER_LIGHT,
-        }
-    else:
-        return {
-            "bg": COLOR_BACKGROUND,
-            "surface": COLOR_PRIMARY,
-            "surface_2": COLOR_SECONDARY,
-            "accent": COLOR_ACCENT,
-            "accent_soft": COLOR_ACCENT_LIGHT,
-            "text": COLOR_TEXT,
-            "text_muted": COLOR_TEXT_MUTED,
-            "border": COLOR_BORDER,
-        }
+    return {
+        "bg": COLOR_BACKGROUND,
+        "surface": COLOR_PRIMARY,
+        "surface_2": COLOR_SECONDARY,
+        "accent": COLOR_ACCENT,
+        "accent_soft": COLOR_ACCENT_LIGHT,
+        "text": COLOR_TEXT,
+        "text_muted": COLOR_TEXT_MUTED,
+        "border": COLOR_BORDER,
+    }
 
-# =========================================================
-# CSS STYLING - Both Themes Included
+
+# CSS STYLING
 # =========================================================
 
-# Dark mode CSS (default)
-dark_css = f"""
-body.theme-dark {{
-    --sf-bg: {COLOR_BACKGROUND};
-    --sf-surface: {COLOR_PRIMARY};
-    --sf-surface-2: {COLOR_SECONDARY};
-    --sf-accent: {COLOR_ACCENT};
-    --sf-accent-soft: {COLOR_ACCENT_LIGHT};
-    --sf-text: {COLOR_TEXT};
-    --sf-text-muted: {COLOR_TEXT_MUTED};
-    --sf-border: {COLOR_BORDER};
-}}
-"""
+pn.config.raw_css.append("""
 
-# Light mode CSS
-light_css = f"""
-body.theme-light {{
-    --sf-bg: {COLOR_BACKGROUND_LIGHT};
-    --sf-surface: {COLOR_PRIMARY_LIGHT};
-    --sf-surface-2: {COLOR_SECONDARY_LIGHT};
-    --sf-accent: {COLOR_ACCENT_LIGHT_MODE};
-    --sf-accent-soft: {COLOR_ACCENT_LIGHT_MODE_LIGHT};
-    --sf-text: {COLOR_TEXT_LIGHT};
-    --sf-text-muted: {COLOR_TEXT_MUTED_LIGHT};
-    --sf-border: {COLOR_BORDER_LIGHT};
-}}
-"""
+body {
+    background-color: #071411 !important;
+}
 
-# Shared CSS (both modes)
-shared_css = f"""
-:root {{
-    --sf-bg: {COLOR_BACKGROUND};
-    --sf-surface: {COLOR_PRIMARY};
-    --sf-surface-2: {COLOR_SECONDARY};
-    --sf-accent: {COLOR_ACCENT};
-    --sf-accent-soft: {COLOR_ACCENT_LIGHT};
-    --sf-text: {COLOR_TEXT};
-    --sf-text-muted: {COLOR_TEXT_MUTED};
-    --sf-border: {COLOR_BORDER};
-}}
-
-html,
-body,
-.bk-root,
-body.theme-dark,
-body.theme-dark > div,
-body.theme-dark .bk-root,
-body.theme-dark .bk-root > div {{
-    background-color: var(--sf-bg);
-    background-image:
-        radial-gradient(circle at top, rgba(143, 184, 170, 0.14), transparent 28%),
-        linear-gradient(180deg, var(--sf-bg) 0%, var(--sf-bg) 75%);
-    color: var(--sf-text) !important;
-}}
-
-body {{
-    background-color: var(--sf-bg) !important;
-    color: var(--sf-text) !important;
-}}
-
-body.theme-dark > div,
-body.theme-dark .bk-root,
-body.theme-dark .bk-root > div {{
-    background-color: var(--sf-bg) !important;
-}}
-
-.sidebar {{
-    background: var(--sf-surface-2);
-    border-right: 1px solid var(--sf-border);
+.sidebar {
+    background: #0b1f1a;
+    border-right: 1px solid #16352d;
     padding: 20px;
-}}
+}
 
-.hero {{
-    background: linear-gradient(135deg, var(--sf-hero-start), var(--sf-bg));
+.hero {
+    background: linear-gradient(135deg,#0d2f25,#071411);
     border-radius: 24px;
     padding: 35px;
     margin-bottom: 20px;
-}}
+}
 
-.sensor-card,
-.section-box {{
-    background: var(--sf-surface);
+.sensor-card {
+    background: #0c1f1a;
     border-radius: 18px;
     padding: 20px;
     border: 1px solid rgba(255,255,255,0.06);
-}}
+}
 
-.section-box {{
+.section-box {
+    background: #0c1f1a;
+    border-radius: 18px;
+    padding: 20px;
     margin-top: 20px;
-}}
+}
 
-h1, h2, h3, p, div {{
-    color: var(--sf-text);
-}}
+h1,h2,h3,p,div {
+    color:white;
+}
 
+/* Match select widgets to dashboard theme */
 .bk-input,
 .bk-input-group .bk-input,
-select.bk-input {{
-    background-color: var(--sf-surface) !important;
-    color: var(--sf-text) !important;
-    border: 1px solid var(--sf-border) !important;
-}}
+select.bk-input {
+    background-color: #0c1f1a !important;
+    color: #ffffff !important;
+    border: 1px solid #16352d !important;
+}
 
 .bk-input option,
-select.bk-input option {{
-    background-color: var(--sf-surface);
-    color: var(--sf-text);
-}}
+select.bk-input option {
+    background-color: #0c1f1a;
+    color: #ffffff;
+}
 
-.bk-tab {{
-    color: var(--sf-text-muted) !important;
-}}
+""")
 
-.bk-tab.bk-active {{
-    color: var(--sf-text) !important;
-    border-bottom-color: var(--sf-accent) !important;
-}}
-"""
 
-pn.config.raw_css.append(dark_css + light_css + shared_css)
-
-# Watch for theme changes and refresh cards
-def on_theme_change(*args):
-    try:
-        refresh_cards()
-    except:
-        pass
-
-theme_state.param.watch(on_theme_change, "mode")
 
 # =========================================================
 # LIVE DATA STORAGE
