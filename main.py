@@ -10,7 +10,7 @@ from bokeh.models import CustomJS
 
 from config import PANEL_PORT, PANEL_TITLE
 from mqtt_handler import init_mqtt, set_active_doc
-from ui_components import hero, refresh_cards, refresh_graph, theme_state
+from ui_components import hero, refresh_cards, refresh_graph, theme_state, dark_css, light_css, shared_css
 from pages.dashboard import dashboard_page
 from pages.analytics import analytics_page
 from pages.export import export_page
@@ -51,14 +51,26 @@ def init_theme():
     doc = pn.state.curdoc
     if doc:
         initial_mode = theme_state.mode
-        doc.js_on_event(
-            "document_ready",
-            CustomJS(code=f"""
-const body = document.body;
-body.classList.remove('theme-dark', 'theme-light');
-body.classList.add('theme-{initial_mode}');
+                # Inject our dashboard CSS into the client document so theme classes take effect
+                css_content = (dark_css + light_css + shared_css).replace('`', "\\`")
+                doc.js_on_event(
+                        "document_ready",
+                        CustomJS(code=f"""
+(function(){{
+    try {{
+        if(!document.getElementById('sf-dynamic-css')){{
+            const s = document.createElement('style');
+            s.id = 'sf-dynamic-css';
+            s.textContent = `{css_content}`;
+            document.head.appendChild(s);
+        }}
+        const body = document.body;
+        body.classList.remove('theme-dark', 'theme-light');
+        body.classList.add('theme-{initial_mode}');
+    }} catch(e){{ console.warn('theme init error', e); }}
+}})();
 """)
-        )
+                )
 
 pn.state.onload(open_browser)
 pn.state.onload(init_theme)
