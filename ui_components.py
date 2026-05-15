@@ -104,15 +104,26 @@ shared_css = f"""
 
 html,
 body,
-.bk-root {{
+.bk-root,
+body.theme-dark,
+body.theme-dark > div,
+body.theme-dark .bk-root,
+body.theme-dark .bk-root > div {{
     background:
-        radial-gradient(circle at top, rgba(212, 165, 116, 0.12), transparent 28%),
+        radial-gradient(circle at top, rgba(143, 184, 170, 0.18), transparent 28%),
         linear-gradient(180deg, var(--sf-bg) 0%, var(--sf-bg) 75%);
-    color: var(--sf-text);
+    color: var(--sf-text) !important;
 }}
 
 body {{
-    background-color: var(--sf-bg);
+    background-color: var(--sf-bg) !important;
+    color: var(--sf-text) !important;
+}}
+
+body.theme-dark > div,
+body.theme-dark .bk-root,
+body.theme-dark .bk-root > div {{
+    background-color: var(--sf-bg) !important;
 }}
 
 .sidebar {{
