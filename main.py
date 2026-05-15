@@ -50,9 +50,11 @@ def init_theme():
     """Initialize theme class on page load"""
     doc = pn.state.curdoc
     if doc:
-        initial_mode = theme_state.mode
+                initial_mode = theme_state.mode
+
                 # Inject our dashboard CSS into the client document so theme classes take effect
-                css_content = (dark_css + light_css + shared_css).replace('`', "\\`")
+                import json
+                css_content = json.dumps(dark_css + light_css + shared_css)
                 doc.js_on_event(
                         "document_ready",
                         CustomJS(code=f"""
@@ -61,7 +63,7 @@ def init_theme():
         if(!document.getElementById('sf-dynamic-css')){{
             const s = document.createElement('style');
             s.id = 'sf-dynamic-css';
-            s.textContent = `{css_content}`;
+            s.textContent = {css_content};
             document.head.appendChild(s);
         }}
         const body = document.body;
