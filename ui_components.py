@@ -109,8 +109,9 @@ body.theme-dark,
 body.theme-dark > div,
 body.theme-dark .bk-root,
 body.theme-dark .bk-root > div {{
-    background:
-        radial-gradient(circle at top, rgba(143, 184, 170, 0.18), transparent 28%),
+    background-color: var(--sf-bg);
+    background-image:
+        radial-gradient(circle at top, rgba(143, 184, 170, 0.14), transparent 28%),
         linear-gradient(180deg, var(--sf-bg) 0%, var(--sf-bg) 75%);
     color: var(--sf-text) !important;
 }}
@@ -127,16 +128,16 @@ body.theme-dark .bk-root > div {{
 }}
 
 .sidebar {{
-    background: linear-gradient(180deg, var(--sf-surface), var(--sf-bg));
+    background: var(--sf-surface);
     border-right: 1px solid var(--sf-border);
-    padding: 22px;
+    padding: 20px;
     box-shadow: inset -1px 0 0 rgba(0,0,0,0.1);
 }}
 
 .hero {{
-    background: linear-gradient(135deg, var(--sf-surface), var(--sf-bg));
-    border-radius: 28px;
-    padding: 38px;
+    background: linear-gradient(135deg, #0d2f25, var(--sf-bg));
+    border-radius: 24px;
+    padding: 35px;
     margin-bottom: 20px;
     border: 1px solid var(--sf-border);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
@@ -144,7 +145,7 @@ body.theme-dark .bk-root > div {{
 
 .sensor-card,
 .section-box {{
-    background: linear-gradient(180deg, var(--sf-surface), var(--sf-bg));
+    background: var(--sf-surface);
     border-radius: 18px;
     padding: 20px;
     border: 1px solid var(--sf-border);
@@ -178,7 +179,7 @@ select.bk-input option {{
 .bk-btn-group .bk-btn {{
     border-radius: 999px !important;
     border: 1px solid var(--sf-border) !important;
-    background: linear-gradient(135deg, rgba(212, 165, 116, 0.22), rgba(212, 165, 116, 0.1)) !important;
+    background: linear-gradient(135deg, rgba(66, 211, 146, 0.20), rgba(66, 211, 146, 0.08)) !important;
     color: var(--sf-text) !important;
 }}
 
