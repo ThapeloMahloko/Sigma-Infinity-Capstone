@@ -3,6 +3,10 @@
 # =========================================================
 
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # MQTT CONFIG
 MQTT_BROKER = os.getenv("MQTT_BROKER", "broker.hivemq.com")
