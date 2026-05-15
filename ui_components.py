@@ -128,10 +128,9 @@ body.theme-dark .bk-root > div {{
 }}
 
 .sidebar {{
-    background: var(--sf-surface);
+    background: var(--sf-surface-2);
     border-right: 1px solid var(--sf-border);
     padding: 20px;
-    box-shadow: inset -1px 0 0 rgba(0,0,0,0.1);
 }}
 
 .hero {{
@@ -139,8 +138,6 @@ body.theme-dark .bk-root > div {{
     border-radius: 24px;
     padding: 35px;
     margin-bottom: 20px;
-    border: 1px solid var(--sf-border);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }}
 
 .sensor-card,
@@ -148,8 +145,7 @@ body.theme-dark .bk-root > div {{
     background: var(--sf-surface);
     border-radius: 18px;
     padding: 20px;
-    border: 1px solid var(--sf-border);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255,255,255,0.06);
 }}
 
 .section-box {{
@@ -166,27 +162,12 @@ select.bk-input {{
     background-color: var(--sf-surface) !important;
     color: var(--sf-text) !important;
     border: 1px solid var(--sf-border) !important;
-    border-radius: 12px !important;
 }}
 
 .bk-input option,
 select.bk-input option {{
     background-color: var(--sf-surface);
     color: var(--sf-text);
-}}
-
-.bk-btn,
-.bk-btn-group .bk-btn {{
-    border-radius: 999px !important;
-    border: 1px solid var(--sf-border) !important;
-    background: linear-gradient(135deg, rgba(66, 211, 146, 0.20), rgba(66, 211, 146, 0.08)) !important;
-    color: var(--sf-text) !important;
-}}
-
-.bk-btn:hover,
-.bk-btn-group .bk-btn:hover {{
-    border-color: var(--sf-accent) !important;
-    box-shadow: 0 0 0 1px var(--sf-accent), 0 10px 24px rgba(0, 0, 0, 0.1);
 }}
 
 .bk-tab {{
