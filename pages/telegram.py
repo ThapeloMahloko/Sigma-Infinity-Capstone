@@ -122,13 +122,14 @@ telegram_page = pn.Column(
             2. Press the test button to send a verification message
             """),
 
-            telegram_btn_send,
+            pn.Row(telegram_btn_send, telegram_check_btn),
             telegram_result,
+            telegram_status,
             css_classes=["section-box"]
         ),
 
         pn.Column(
-            pn.pane.PNG("telegram_qr.png", width=300) if telegram_link and os.path.exists("telegram_qr.png") else pn.pane.Markdown("QR code not available."),
+            pn.pane.PNG("telegram_qr.png", width=300) if os.path.exists("telegram_qr.png") else pn.pane.Markdown("QR code not available."),
         )
     )
 )
