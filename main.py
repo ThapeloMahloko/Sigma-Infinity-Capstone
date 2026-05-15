@@ -11,7 +11,7 @@ from bokeh.models import CustomJS
 
 from config import PANEL_PORT, PANEL_TITLE
 from mqtt_handler import init_mqtt, set_active_doc
-from ui_components import hero, refresh_cards, refresh_graph, theme_state
+from ui_components import hero, refresh_cards, refresh_graph
 from pages.dashboard import dashboard_page
 from pages.analytics import analytics_page
 from pages.export import export_page
@@ -73,8 +73,8 @@ THEME_VARS = {
 
 
 def _theme_js(mode: str) -> str:
-        variables = json.dumps(THEME_VARS[mode])
-        return f"""
+    variables = json.dumps(THEME_VARS[mode])
+    return f"""
 (function(){{
     const vars = {variables};
     const root = document.documentElement;
@@ -83,18 +83,28 @@ def _theme_js(mode: str) -> str:
         root.style.setProperty(name, value);
         if (body) body.style.setProperty(name, value);
     }}
+    const background = vars['--sf-bg'];
+    const foreground = vars['--sf-text'];
+    root.style.backgroundColor = background;
+    root.style.color = foreground;
     if (body) {{
         body.classList.remove('theme-dark', 'theme-light');
         body.classList.add('theme-{mode}');
+        body.style.backgroundColor = background;
+        body.style.color = foreground;
     }}
+    document.querySelectorAll('body > div').forEach((el) => {{
+        el.style.backgroundColor = background;
+        el.style.color = foreground;
+    }});
 }})();
 """
 
 
 def _toggle_theme_js() -> str:
-        dark_variables = json.dumps(THEME_VARS["dark"])
-        light_variables = json.dumps(THEME_VARS["light"])
-        return f"""
+    dark_variables = json.dumps(THEME_VARS["dark"])
+    light_variables = json.dumps(THEME_VARS["light"])
+    return f"""
 (function(){{
     const body = document.body;
     const root = document.documentElement;
@@ -104,22 +114,29 @@ def _toggle_theme_js() -> str:
         root.style.setProperty(name, value);
         if (body) body.style.setProperty(name, value);
     }}
+    const background = vars['--sf-bg'];
+    const foreground = vars['--sf-text'];
+    root.style.backgroundColor = background;
+    root.style.color = foreground;
     if (body) {{
         body.classList.remove('theme-dark', 'theme-light');
         body.classList.add(isDark ? 'theme-light' : 'theme-dark');
+        body.style.backgroundColor = background;
+        body.style.color = foreground;
     }}
+    document.querySelectorAll('body > div').forEach((el) => {{
+        el.style.backgroundColor = background;
+        el.style.color = foreground;
+    }});
 }})();
 """
+
 
 def init_theme():
     """Initialize theme class on page load"""
     doc = pn.state.curdoc
     if doc:
-                initial_mode = theme_state.mode
-                doc.js_on_event(
-                        "document_ready",
-                        CustomJS(code=_theme_js(initial_mode))
-                )
+        doc.js_on_event("document_ready", CustomJS(code=_theme_js("dark")))
 
 pn.state.onload(open_browser)
 pn.state.onload(init_theme)
@@ -164,27 +181,12 @@ controls_btn = pn.widgets.Button(name="⚙ Controls")
 telegram_btn = pn.widgets.Button(name="🤖 Telegram Bot")
 
 # Theme toggle button
-def toggle_theme(event=None):
-    new_mode = "light" if theme_state.mode == "dark" else "dark"
-    theme_state.mode = new_mode
-    
-    # Refresh cards with new colors
-    from ui_components import refresh_cards
-    refresh_cards()
-
 theme_btn = pn.widgets.Button(
     name="🌙 Dark Mode",
     button_type="primary",
     width=200
 )
 theme_btn.js_on_click(code=_toggle_theme_js())
-theme_btn.on_click(toggle_theme)
-
-# Update button text when theme changes
-def update_theme_btn_label(*args):
-    theme_btn.name = "☀️ Light Mode" if theme_state.mode == "dark" else "🌙 Dark Mode"
-
-theme_state.param.watch(update_theme_btn_label, "mode")
 
 dashboard_btn.on_click(show_dashboard)
 analytics_btn.on_click(show_analytics)

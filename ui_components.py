@@ -234,64 +234,62 @@ status_card = pn.pane.HTML(width=760)
 
 def refresh_cards():
     from mqtt_handler import alarm_status, feed_status, motion_status, data_lock
-    
-    colors = get_current_colors()
 
     with data_lock:
         values = dict(sensor_values)
 
     temp_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:{colors["text_muted"]};'>TEMPERATURE</div>
+        <div style='font-size:14px;color:var(--sf-text-muted);'>TEMPERATURE</div>
         <div style='font-size:48px;font-weight:bold;'>{values['temperature']:.1f}°C</div>
     </div>
     """
 
     humidity_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:{colors["text_muted"]};'>HUMIDITY</div>
+        <div style='font-size:14px;color:var(--sf-text-muted);'>HUMIDITY</div>
         <div style='font-size:48px;font-weight:bold;'>{values['humidity']:.1f}%</div>
     </div>
     """
 
     soil_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:{colors["text_muted"]};'>SOIL MOISTURE</div>
+        <div style='font-size:14px;color:var(--sf-text-muted);'>SOIL MOISTURE</div>
         <div style='font-size:48px;font-weight:bold;'>{values['soil']:.1f}%</div>
     </div>
     """
 
     water_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:{colors["text_muted"]};'>WATER LEVEL</div>
+        <div style='font-size:14px;color:var(--sf-text-muted);'>WATER LEVEL</div>
         <div style='font-size:48px;font-weight:bold;'>{values['water']:.1f}%</div>
     </div>
     """
 
     light_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:{colors["text_muted"]};'>LIGHT</div>
+        <div style='font-size:14px;color:var(--sf-text-muted);'>LIGHT</div>
         <div style='font-size:48px;font-weight:bold;'>{values['light']:.1f}%</div>
     </div>
     """
 
     rain_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:{colors["text_muted"]};'>RAIN</div>
+        <div style='font-size:14px;color:var(--sf-text-muted);'>RAIN</div>
         <div style='font-size:48px;font-weight:bold;'>{values['rain']:.1f}%</div>
     </div>
     """
 
     fan_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:{colors["text_muted"]};'>FAN SPEED</div>
+        <div style='font-size:14px;color:var(--sf-text-muted);'>FAN SPEED</div>
         <div style='font-size:48px;font-weight:bold;'>{int(values['fan_speed'])}</div>
     </div>
     """
 
     status_card.object = f"""
     <div class='sensor-card'>
-        <div style='font-size:14px;color:{colors["text_muted"]};'>SYSTEM STATUS</div>
+        <div style='font-size:14px;color:var(--sf-text-muted);'>SYSTEM STATUS</div>
         <div style='font-size:20px;font-weight:600;margin-top:8px;'>
             Alarm: {alarm_status} | Feeder: {feed_status} | Motion: {motion_status}
         </div>
