@@ -1,0 +1,22 @@
+{
+  "name": "smart-farm-theme",
+  "displayName": "Smart Farm Theme",
+  "description": "Smart Farm Dark - deep forest-green VS Code theme",
+  "version": "0.1.0",
+  "publisher": "thapelo",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Smart Farm Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/smart-farm-dark-theme.json"
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "name": "Smart Farm Dark",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#071411",
+    "sideBar.background": "#0b1f1a",
+    "activityBar.background": "#0b1f1a",
+    "panel.background": "#0c1f1a",
+    "terminal.background": "#0c1f1a",
+    "tab.activeBackground": "#0c1f1a",
+    "tab.inactiveBackground": "#0b1f1a",
+    "tab.inactiveForeground": "#8fb8aa",
+    "statusBar.background": "#071411",
+    "titleBar.activeBackground": "#0b1f1a",
+    "input.background": "#0c1f1a",
+    "input.border": "#16352d",
+    "list.activeSelectionBackground": "#0d2f25",
+    "list.hoverBackground": "#0d2f25",
+    "editor.selectionBackground": "#16352d",
+    "editor.lineHighlightBackground": "#0c1f1a",
+    "editorGroupHeader.tabsBackground": "#0b1f1a",
+    "badge.background": "#16352d",
+    "badge.foreground": "#8fb8aa",
+    "editorCursor.foreground": "#ffffff",
+    "editorLineNumber.foreground": "#8fb8aa",
+    "editorWhitespace.foreground": "#16352d"
+  },
+  "tokenColors": [
+    {
+      "scope": ["comment", "punctuation.definition.comment"],
+      "settings": {
+        "foreground": "#8fb8aa",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": ["string", "constant.other.symbol"],
+      "settings": { "foreground": "#b8d1c8" }
+    },
+    {
+      "scope": ["keyword", "storage.type"],
+      "settings": { "foreground": "#ffffff", "fontStyle": "bold" }
+    },
+    {
+      "scope": ["entity.name.function", "support.function"],
+      "settings": { "foreground": "#8fb8aa" }
+    },
+    {
+      "scope": ["variable", "identifier"],
+      "settings": { "foreground": "#b8d1c8" }
+    },
+    {
+      "scope": ["constant.numeric", "constant.language", "constant.numeric.*"],
+      "settings": { "foreground": "#8fb8aa" }
+    },
+    {
+      "scope": ["storage.type.class", "entity.name.type", "support.class"],
+      "settings": { "foreground": "#b8d1c8" }
+    }
+  ]
+}
