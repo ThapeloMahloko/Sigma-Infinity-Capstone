@@ -6,6 +6,7 @@ import os
 import argparse
 import panel as pn
 import webbrowser
+from bokeh.models import CustomJS
 
 from config import PANEL_PORT, PANEL_TITLE
 from mqtt_handler import init_mqtt, set_active_doc
@@ -50,9 +51,14 @@ def init_theme():
     doc = pn.state.curdoc
     if doc:
         initial_mode = theme_state.mode
-        script = f"""
-        document.body.classList.add('theme-{initial_mode}');
-        """
+        doc.js_on_event(
+            "document_ready",
+            CustomJS(code=f"""
+const body = document.body;
+body.classList.remove('theme-dark', 'theme-light');
+body.classList.add('theme-{initial_mode}');
+""")
+        )
 
 pn.state.onload(open_browser)
 pn.state.onload(init_theme)
@@ -101,15 +107,6 @@ def toggle_theme(event=None):
     new_mode = "light" if theme_state.mode == "dark" else "dark"
     theme_state.mode = new_mode
     
-    # Update the body class to reflect the theme
-    doc = pn.state.curdoc
-    if doc:
-        script = f"""
-        document.body.className = document.body.className.replace(/theme-(dark|light)/g, '');
-        document.body.classList.add('theme-{new_mode}');
-        """
-        doc.add_next_tick_callback(lambda: None)
-    
     # Refresh cards with new colors
     from ui_components import refresh_cards
     refresh_cards()
@@ -119,6 +116,12 @@ theme_btn = pn.widgets.Button(
     button_type="primary",
     width=200
 )
+theme_btn.js_on_click(code="""
+const body = document.body;
+const isDark = body.classList.contains('theme-dark');
+body.classList.remove('theme-dark', 'theme-light');
+body.classList.add(isDark ? 'theme-light' : 'theme-dark');
+""")
 theme_btn.on_click(toggle_theme)
 
 # Update button text when theme changes
