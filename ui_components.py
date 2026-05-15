@@ -135,7 +135,7 @@ body.theme-dark .bk-root > div {{
 }}
 
 .hero {{
-    background: linear-gradient(135deg, #0d2f25, var(--sf-bg));
+    background: linear-gradient(135deg, var(--sf-hero-start), var(--sf-bg));
     border-radius: 24px;
     padding: 35px;
     margin-bottom: 20px;
