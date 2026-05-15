@@ -4,13 +4,14 @@
 
 import os
 import argparse
+import json
 import panel as pn
 import webbrowser
 from bokeh.models import CustomJS
 
 from config import PANEL_PORT, PANEL_TITLE
 from mqtt_handler import init_mqtt, set_active_doc
-from ui_components import hero, refresh_cards, refresh_graph, theme_state, dark_css, light_css, shared_css
+from ui_components import hero, refresh_cards, refresh_graph, theme_state
 from pages.dashboard import dashboard_page
 from pages.analytics import analytics_page
 from pages.export import export_page
@@ -46,32 +47,78 @@ def open_browser():
     except Exception as e:
         print(f"ℹ Browser auto-open skipped: {e}")
 
+
+THEME_VARS = {
+        "dark": {
+                "--sf-bg": "#0f1510",
+                "--sf-surface": "#1a2818",
+                "--sf-surface-2": "#222f22",
+                "--sf-accent": "#d4a574",
+                "--sf-accent-soft": "#e8c9a0",
+                "--sf-text": "#f5f1e8",
+                "--sf-text-muted": "#b8a889",
+                "--sf-border": "#2d3d2a",
+        },
+        "light": {
+                "--sf-bg": "#f8faf5",
+                "--sf-surface": "#e8f3e0",
+                "--sf-surface-2": "#f0f7ed",
+                "--sf-accent": "#8b6f47",
+                "--sf-accent-soft": "#a68a5f",
+                "--sf-text": "#1a2818",
+                "--sf-text-muted": "#6b7a5f",
+                "--sf-border": "#c8d5c0",
+        },
+}
+
+
+def _theme_js(mode: str) -> str:
+        variables = json.dumps(THEME_VARS[mode])
+        return f"""
+(function(){{
+    const vars = {variables};
+    const root = document.documentElement;
+    const body = document.body;
+    for (const [name, value] of Object.entries(vars)) {{
+        root.style.setProperty(name, value);
+        if (body) body.style.setProperty(name, value);
+    }}
+    if (body) {{
+        body.classList.remove('theme-dark', 'theme-light');
+        body.classList.add('theme-{mode}');
+    }}
+}})();
+"""
+
+
+def _toggle_theme_js() -> str:
+        dark_variables = json.dumps(THEME_VARS["dark"])
+        light_variables = json.dumps(THEME_VARS["light"])
+        return f"""
+(function(){{
+    const body = document.body;
+    const root = document.documentElement;
+    const isDark = !!(body && body.classList.contains('theme-dark'));
+    const vars = isDark ? {light_variables} : {dark_variables};
+    for (const [name, value] of Object.entries(vars)) {{
+        root.style.setProperty(name, value);
+        if (body) body.style.setProperty(name, value);
+    }}
+    if (body) {{
+        body.classList.remove('theme-dark', 'theme-light');
+        body.classList.add(isDark ? 'theme-light' : 'theme-dark');
+    }}
+}})();
+"""
+
 def init_theme():
     """Initialize theme class on page load"""
     doc = pn.state.curdoc
     if doc:
                 initial_mode = theme_state.mode
-
-                # Inject our dashboard CSS into the client document so theme classes take effect
-                import json
-                css_content = json.dumps(dark_css + light_css + shared_css)
                 doc.js_on_event(
                         "document_ready",
-                        CustomJS(code=f"""
-(function(){{
-    try {{
-        if(!document.getElementById('sf-dynamic-css')){{
-            const s = document.createElement('style');
-            s.id = 'sf-dynamic-css';
-            s.textContent = {css_content};
-            document.head.appendChild(s);
-        }}
-        const body = document.body;
-        body.classList.remove('theme-dark', 'theme-light');
-        body.classList.add('theme-{initial_mode}');
-    }} catch(e){{ console.warn('theme init error', e); }}
-}})();
-""")
+                        CustomJS(code=_theme_js(initial_mode))
                 )
 
 pn.state.onload(open_browser)
@@ -130,12 +177,7 @@ theme_btn = pn.widgets.Button(
     button_type="primary",
     width=200
 )
-theme_btn.js_on_click(code="""
-const body = document.body;
-const isDark = body.classList.contains('theme-dark');
-body.classList.remove('theme-dark', 'theme-light');
-body.classList.add(isDark ? 'theme-light' : 'theme-dark');
-""")
+theme_btn.js_on_click(code=_toggle_theme_js())
 theme_btn.on_click(toggle_theme)
 
 # Update button text when theme changes
