@@ -23,7 +23,10 @@ _last_water_warning = 0
 data_lock = threading.Lock()
 active_doc = None
 
-client = mqtt.Client()
+try:
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+except AttributeError:
+    client = mqtt.Client()
 
 # =========================================================
 # CALLBACKS
