@@ -60,7 +60,7 @@ body {
     background: #0c1f1a;
     border-radius: 18px;
     padding: 20px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid #16352d;
 }
 
 .section-box {
@@ -68,6 +68,7 @@ body {
     border-radius: 18px;
     padding: 20px;
     margin-top: 20px;
+    border: 1px solid #16352d;
 }
 
 h1,h2,h3,p,div {
@@ -87,6 +88,54 @@ select.bk-input {
 select.bk-input option {
     background-color: #0c1f1a;
     color: #ffffff;
+}
+
+/* Button Styling matching Flutter app */
+.bk-btn {
+    border-radius: 999px !important;
+    font-weight: 600 !important;
+    padding: 8px 16px !important;
+}
+
+.bk-btn.bk-btn-success {
+    background-color: rgba(66, 211, 146, 0.4) !important;
+    border: 1px solid #42d392 !important;
+    color: white !important;
+}
+
+.bk-btn.bk-btn-success:hover {
+    background-color: rgba(66, 211, 146, 0.6) !important;
+}
+
+.bk-btn.bk-btn-danger {
+    background-color: rgba(244, 67, 54, 0.8) !important;
+    border: 1px solid #f44336 !important;
+    color: white !important;
+}
+
+.bk-btn.bk-btn-danger:hover {
+    background-color: rgba(244, 67, 54, 1.0) !important;
+}
+
+.bk-btn.bk-btn-warning {
+    background-color: rgba(255, 152, 0, 0.8) !important;
+    border: 1px solid #ff9800 !important;
+    color: white !important;
+}
+
+.bk-btn.bk-btn-warning:hover {
+    background-color: rgba(255, 152, 0, 1.0) !important;
+}
+
+.bk-btn.bk-btn-default {
+    background-color: transparent !important;
+    border: 1px solid #16352d !important;
+    color: #8fb8aa !important;
+}
+
+.bk-btn.bk-btn-default:hover {
+    background-color: #16352d !important;
+    color: white !important;
 }
 
 """)

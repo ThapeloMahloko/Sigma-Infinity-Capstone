@@ -1,0 +1,38 @@
+﻿Running Gradle task 'assembleRelease'...                        
+flutter : 
+At line:1 char:1
++ flutter build apk > build_log.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:cleanMergeReleaseAssets'.
+> java.io.IOException: Unable to delete directory 'C:\Users\thaba\OneDrive\Documents\GitHub\Sigma-Infinity-Capstone\flu
+tter_app\build\app\intermediates\assets\release\mergeReleaseAssets'
+    Failed to delete some children. This might happen because a process has files open or has its working directory 
+set in the target directory.
+    - C:\Users\thaba\OneDrive\Documents\GitHub\Sigma-Infinity-Capstone\flutter_app\build\app\intermediates\assets\relea
+se\mergeReleaseAssets\flutter_assets\fonts
+    - C:\Users\thaba\OneDrive\Documents\GitHub\Sigma-Infinity-Capstone\flutter_app\build\app\intermediates\assets\relea
+se\mergeReleaseAssets\flutter_assets\packages\cupertino_icons\assets
+    - C:\Users\thaba\OneDrive\Documents\GitHub\Sigma-Infinity-Capstone\flutter_app\build\app\intermediates\assets\relea
+se\mergeReleaseAssets\flutter_assets\packages\cupertino_icons
+    - C:\Users\thaba\OneDrive\Documents\GitHub\Sigma-Infinity-Capstone\flutter_app\build\app\intermediates\assets\relea
+se\mergeReleaseAssets\flutter_assets\packages
+    - C:\Users\thaba\OneDrive\Documents\GitHub\Sigma-Infinity-Capstone\flutter_app\build\app\intermediates\assets\relea
+se\mergeReleaseAssets\flutter_assets\shaders
+    - C:\Users\thaba\OneDrive\Documents\GitHub\Sigma-Infinity-Capstone\flutter_app\build\app\intermediates\assets\relea
+se\mergeReleaseAssets\flutter_assets
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 9s
+Running Gradle task 'assembleRelease'...                           10,5s
+Gradle task assembleRelease failed with exit code 1
