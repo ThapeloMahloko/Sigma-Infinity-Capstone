@@ -182,59 +182,64 @@ def refresh_cards():
     with data_lock:
         values = dict(sensor_values)
 
+    card_style = f"background: {COLOR_PRIMARY}; border-radius: 18px; padding: 20px; border: 1px solid {COLOR_BORDER}; min-height: 120px; display: flex; flex-direction: column; justify-content: center;"
+    label_style = f"font-size:14px;color:{COLOR_TEXT_MUTED}; text-transform: uppercase;"
+    value_style = f"font-size:48px;font-weight:bold;color:{COLOR_TEXT}; line-height: 1.2;"
+    status_val_style = f"font-size:20px;font-weight:600;color:{COLOR_TEXT};margin-top:8px;"
+
     temp_card.object = f"""
-    <div class='sensor-card'>
-        <div style='font-size:14px;color:var(--sf-text-muted);'>TEMPERATURE</div>
-        <div style='font-size:48px;font-weight:bold;'>{values['temperature']:.1f}°C</div>
+    <div style='{card_style}'>
+        <div style='{label_style}'>TEMPERATURE</div>
+        <div style='{value_style}'>{values['temperature']:.1f}°C</div>
     </div>
     """
 
     humidity_card.object = f"""
-    <div class='sensor-card'>
-        <div style='font-size:14px;color:var(--sf-text-muted);'>HUMIDITY</div>
-        <div style='font-size:48px;font-weight:bold;'>{values['humidity']:.1f}%</div>
+    <div style='{card_style}'>
+        <div style='{label_style}'>HUMIDITY</div>
+        <div style='{value_style}'>{values['humidity']:.1f}%</div>
     </div>
     """
 
     soil_card.object = f"""
-    <div class='sensor-card'>
-        <div style='font-size:14px;color:var(--sf-text-muted);'>SOIL MOISTURE</div>
-        <div style='font-size:48px;font-weight:bold;'>{values['soil']:.1f}%</div>
+    <div style='{card_style}'>
+        <div style='{label_style}'>SOIL MOISTURE</div>
+        <div style='{value_style}'>{values['soil']:.1f}%</div>
     </div>
     """
 
     water_card.object = f"""
-    <div class='sensor-card'>
-        <div style='font-size:14px;color:var(--sf-text-muted);'>WATER LEVEL</div>
-        <div style='font-size:48px;font-weight:bold;'>{values['water']:.1f}%</div>
+    <div style='{card_style}'>
+        <div style='{label_style}'>WATER LEVEL</div>
+        <div style='{value_style}'>{values['water']:.1f}%</div>
     </div>
     """
 
     light_card.object = f"""
-    <div class='sensor-card'>
-        <div style='font-size:14px;color:var(--sf-text-muted);'>LIGHT</div>
-        <div style='font-size:48px;font-weight:bold;'>{values['light']:.1f}%</div>
+    <div style='{card_style}'>
+        <div style='{label_style}'>LIGHT</div>
+        <div style='{value_style}'>{values['light']:.1f}%</div>
     </div>
     """
 
     rain_card.object = f"""
-    <div class='sensor-card'>
-        <div style='font-size:14px;color:var(--sf-text-muted);'>RAIN</div>
-        <div style='font-size:48px;font-weight:bold;'>{values['rain']:.1f}%</div>
+    <div style='{card_style}'>
+        <div style='{label_style}'>RAIN</div>
+        <div style='{value_style}'>{values['rain']:.1f}%</div>
     </div>
     """
 
     fan_card.object = f"""
-    <div class='sensor-card'>
-        <div style='font-size:14px;color:var(--sf-text-muted);'>FAN SPEED</div>
-        <div style='font-size:48px;font-weight:bold;'>{int(values['fan_speed'])}</div>
+    <div style='{card_style}'>
+        <div style='{label_style}'>FAN SPEED</div>
+        <div style='{value_style}'>{int(values['fan_speed'])}</div>
     </div>
     """
 
     status_card.object = f"""
-    <div class='sensor-card'>
-        <div style='font-size:14px;color:var(--sf-text-muted);'>SYSTEM STATUS</div>
-        <div style='font-size:20px;font-weight:600;margin-top:8px;'>
+    <div style='{card_style}'>
+        <div style='{label_style}'>SYSTEM STATUS</div>
+        <div style='{status_val_style}'>
             Alarm: {alarm_status} | Feeder: {feed_status} | Motion: {motion_status}
         </div>
     </div>
