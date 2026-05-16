@@ -51,8 +51,7 @@ dynamic_css = pn.pane.HTML("")
 
 def update_dynamic_css():
     colors = get_current_colors()
-    dynamic_css.object = f"""
-    <style>
+    css_string = f"""
     body {{ background-color: {colors['bg']} !important; }}
     .sidebar {{ background: {colors['surface_2']} !important; border-right: 1px solid {colors['border']} !important; }}
     .hero {{ background: linear-gradient(135deg, {colors['surface']}, {colors['bg']}) !important; }}
@@ -61,8 +60,23 @@ def update_dynamic_css():
     h1,h2,h3,p,div {{ color: {colors['text']} !important; }}
     .bk-input, .bk-input-group .bk-input, select.bk-input {{ background-color: {colors['surface']} !important; color: {colors['text']} !important; border: 1px solid {colors['border']} !important; }}
     .bk-input option, select.bk-input option {{ background-color: {colors['surface']} !important; color: {colors['text']} !important; }}
-    </style>
     """
+    
+    script = f"""
+    <script>
+    (function() {{
+        var style = document.getElementById('smart-farm-dynamic-theme');
+        if (!style) {{
+            style = document.createElement('style');
+            style.id = 'smart-farm-dynamic-theme';
+            document.head.appendChild(style);
+        }}
+        style.innerHTML = `{css_string}`;
+    }})();
+    </script>
+    """
+    dynamic_css.object = script
+
 update_dynamic_css()
 
 
