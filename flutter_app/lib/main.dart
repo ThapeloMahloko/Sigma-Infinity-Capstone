@@ -43,6 +43,8 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final MqttService _mqttService = MqttService();
   bool _isConnected = false;
+  bool _isConnecting = false;
+  String _mqttStatus = 'Connecting...';
 
   // Sensor Data
   double temperature = 0.0;
@@ -64,11 +66,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _setupMqtt() async {
+    if (_isConnecting) return;
+
+    setState(() {
+      _isConnecting = true;
+      _mqttStatus = 'Connecting...';
+    });
+
     _mqttService.onMessage = _handleMessage;
     _mqttService.onConnectionChanged = (connected) {
       if (!mounted) return;
       setState(() {
         _isConnected = connected;
+        _mqttStatus = connected ? 'Connected' : 'Offline';
       });
     };
 
@@ -78,8 +88,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (connected) {
       setState(() {
         _isConnected = true;
+        _isConnecting = false;
+        _mqttStatus = 'Connected';
       });
       _mqttService.subscribeToSensors();
+    } else {
+      setState(() {
+        _isConnected = false;
+        _isConnecting = false;
+        _mqttStatus = 'MQTT failed';
+      });
     }
   }
 
@@ -113,6 +131,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _sendCommand(String topic, String message) {
     if (!_mqttService.publishMessage(topic, message)) {
+      setState(() {
+        _isConnected = false;
+        _mqttStatus = 'Offline';
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cannot send command. MQTT disconnected.'),
@@ -147,9 +169,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _isConnected ? 'Connected' : 'Offline',
+                  _mqttStatus,
                   style: const TextStyle(color: Color(0xFF8fb8aa)),
                 ),
+                if (!_isConnected)
+                  IconButton(
+                    tooltip: 'Reconnect MQTT',
+                    onPressed: _isConnecting ? null : _setupMqtt,
+                    icon: const Icon(Icons.refresh, size: 20),
+                    color: const Color(0xFF8fb8aa),
+                  ),
               ],
             ),
           ),
