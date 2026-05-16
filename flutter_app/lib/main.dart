@@ -52,7 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   double light = 0.0;
   double rain = 0.0;
   double fanSpeed = 0.0;
-  
+
   String alarmStatus = 'DISARMED';
   String feedStatus = 'CLOSED';
   String motionStatus = 'NO MOTION';
@@ -65,7 +65,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _setupMqtt() async {
     _mqttService.onMessage = _handleMessage;
+    _mqttService.onConnectionChanged = (connected) {
+      if (!mounted) return;
+      setState(() {
+        _isConnected = connected;
+      });
+    };
+
     bool connected = await _mqttService.connect();
+    if (!mounted) return;
+
     if (connected) {
       setState(() {
         _isConnected = true;
@@ -103,20 +112,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _sendCommand(String topic, String message) {
-    if (_isConnected) {
-      _mqttService.publishMessage(topic, message);
-    } else {
+    if (!_mqttService.publishMessage(topic, message)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot send command. MQTT disconnected.')),
+        const SnackBar(
+          content: Text('Cannot send command. MQTT disconnected.'),
+        ),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _mqttService.disconnect();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Smart Farm Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Smart Farm Dashboard',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -131,10 +149,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Text(
                   _isConnected ? 'Connected' : 'Offline',
                   style: const TextStyle(color: Color(0xFF8fb8aa)),
-                )
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
       body: ListView(
@@ -162,15 +180,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          GridView.count(
-            crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 2,
+          GridView.extent(
+            maxCrossAxisExtent: 180,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 1.2,
+            childAspectRatio: 1.1,
             children: [
-              _buildSensorCard('TEMPERATURE', '${temperature.toStringAsFixed(1)}°C'),
+              _buildSensorCard(
+                'TEMPERATURE',
+                '${temperature.toStringAsFixed(1)}°C',
+              ),
               _buildSensorCard('HUMIDITY', '${humidity.toStringAsFixed(1)}%'),
               _buildSensorCard('SOIL MOISTURE', '${soil.toStringAsFixed(1)}%'),
               _buildSensorCard('WATER LEVEL', '${water.toStringAsFixed(1)}%'),
@@ -189,14 +210,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
             spacing: 16,
             runSpacing: 16,
             children: [
-              _buildControlButton('Pump ON', Icons.water_drop, () => _sendCommand('sitech/farm/control/pump', 'ON')),
-              _buildControlButton('Pump OFF', Icons.water_drop_outlined, () => _sendCommand('sitech/farm/control/pump', 'OFF'), isDanger: true),
-              _buildControlButton('Fan ON', Icons.mode_fan_off_sharp, () => _sendCommand('sitech/farm/control/fan_speed', '130')),
-              _buildControlButton('Fan OFF', Icons.mode_fan_off_sharp, () => _sendCommand('sitech/farm/control/fan_speed', '0'), isDanger: true),
-              _buildControlButton('Alarm ON', Icons.warning, () => _sendCommand('sitech/farm/control/alarm', 'ON')),
-              _buildControlButton('Alarm OFF', Icons.notifications_off, () => _sendCommand('sitech/farm/control/alarm', 'OFF'), isDanger: true),
-              _buildControlButton('Feed OPEN', Icons.restaurant, () => _sendCommand('sitech/farm/control/feed', 'OPEN')),
-              _buildControlButton('Feed CLOSE', Icons.restaurant_menu, () => _sendCommand('sitech/farm/control/feed', 'CLOSE'), isDanger: true),
+              _buildControlButton(
+                'Pump ON',
+                Icons.water_drop,
+                () => _sendCommand('sitech/farm/control/pump', 'ON'),
+              ),
+              _buildControlButton(
+                'Pump OFF',
+                Icons.water_drop_outlined,
+                () => _sendCommand('sitech/farm/control/pump', 'OFF'),
+                isDanger: true,
+              ),
+              _buildControlButton(
+                'Fan ON',
+                Icons.mode_fan_off_sharp,
+                () => _sendCommand('sitech/farm/control/fan_speed', '130'),
+              ),
+              _buildControlButton(
+                'Fan OFF',
+                Icons.mode_fan_off_sharp,
+                () => _sendCommand('sitech/farm/control/fan_speed', '0'),
+                isDanger: true,
+              ),
+              _buildControlButton(
+                'Alarm ON',
+                Icons.warning,
+                () => _sendCommand('sitech/farm/control/alarm', 'ON'),
+              ),
+              _buildControlButton(
+                'Alarm OFF',
+                Icons.notifications_off,
+                () => _sendCommand('sitech/farm/control/alarm', 'OFF'),
+                isDanger: true,
+              ),
+              _buildControlButton(
+                'Feed OPEN',
+                Icons.restaurant,
+                () => _sendCommand('sitech/farm/control/feed', 'OPEN'),
+              ),
+              _buildControlButton(
+                'Feed CLOSE',
+                Icons.restaurant_menu,
+                () => _sendCommand('sitech/farm/control/feed', 'CLOSE'),
+                isDanger: true,
+              ),
             ],
           ),
           const SizedBox(height: 40),
@@ -247,26 +304,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: const TextStyle(fontSize: 12, color: Color(0xFF8fb8aa)),
           ),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildControlButton(String label, IconData icon, VoidCallback onPressed, {bool isDanger = false}) {
+  Widget _buildControlButton(
+    String label,
+    IconData icon,
+    VoidCallback onPressed, {
+    bool isDanger = false,
+  }) {
     return ElevatedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon, color: Colors.white, size: 20),
       label: Text(label, style: const TextStyle(color: Colors.white)),
       style: ElevatedButton.styleFrom(
-        backgroundColor: isDanger ? Colors.red.withOpacity(0.8) : const Color(0xFF42d392).withOpacity(0.4),
+        backgroundColor: isDanger
+            ? Colors.red.withValues(alpha: 0.8)
+            : const Color(0xFF42d392).withValues(alpha: 0.4),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999),
-          side: BorderSide(color: isDanger ? Colors.red : const Color(0xFF42d392)),
+          side: BorderSide(
+            color: isDanger ? Colors.red : const Color(0xFF42d392),
+          ),
         ),
       ),
     );
