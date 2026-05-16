@@ -1,9 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
-
 import 'package:mqtt_client/mqtt_client.dart';
-
 import 'mqtt_setup.dart';
 
 class MqttService {
@@ -13,33 +11,34 @@ class MqttService {
   final String broker = 'broker.hivemq.com';
   final String clientId = 'sf${DateTime.now().millisecondsSinceEpoch}';
 
-  StreamSubscription<List<MqttReceivedMessage<MqttMessage>>>?
-  _updatesSubscription;
+  StreamSubscription<List<MqttReceivedMessage<MqttMessage>>>? _updatesSubscription;
 
   // Callback for when new sensor data arrives
   Function(String topic, String payload)? onMessage;
   Function(bool connected)? onConnectionChanged;
 
-  bool get isConnected =>
-      client?.connectionStatus?.state == MqttConnectionState.connected;
+  bool get isConnected => client?.connectionStatus?.state == MqttConnectionState.connected;
 
   Future<bool> connect() async {
     if (isConnected) return true;
 
     client = setupMqttClient(broker, clientId);
-    client!
-      ..setProtocolV311()
-      ..logging(on: false)
-      ..keepAlivePeriod = 30
-      ..connectTimeoutPeriod = 5000
-      ..autoReconnect = true
-      ..resubscribeOnAutoReconnect = true
-      ..onDisconnected = _onDisconnected
-      ..onConnected = _onConnected
-      ..onAutoReconnect = _onAutoReconnect
-      ..onAutoReconnected = _onAutoReconnected
-      ..onSubscribed = _onSubscribed
-      ..onSubscribeFail = _onSubscribeFail;
+    
+    client!.setProtocolV311();
+    client!.logging(on: false);
+    client!.keepAlivePeriod = 30;
+    
+    // Direct assignments instead of cascade to avoid runtime errors
+    client!.autoReconnect = true;
+    client!.resubscribeOnAutoReconnect = true;
+    
+    // Callbacks outside cascade
+    client!.onDisconnected = _onDisconnected;
+    client!.onConnected = _onConnected;
+    client!.onAutoReconnect = _onAutoReconnect;
+    client!.onAutoReconnected = _onAutoReconnected;
+    client!.onSubscribed = _onSubscribed;
+    client!.onSubscribeFail = _onSubscribeFail;
 
     final connMess = MqttConnectMessage()
         .withClientIdentifier(clientId)
@@ -66,9 +65,7 @@ class MqttService {
       return true;
     }
 
-    print(
-      'MQTT: ERROR Client connection failed - status is ${client!.connectionStatus}',
-    );
+    print('MQTT: ERROR Client connection failed - status is ${client!.connectionStatus}');
     _safeDisconnect();
     return false;
   }
@@ -78,17 +75,16 @@ class MqttService {
     _updatesSubscription = client!.updates?.listen((messages) {
       if (messages.isEmpty) return;
 
-      final recMess = messages.first.payload;
-      if (recMess is! MqttPublishMessage) return;
+      // Iterate all messages in the batch, not just the first!
+      for (final message in messages) {
+        final recMess = message.payload;
+        if (recMess is! MqttPublishMessage) continue;
 
-      final payload = MqttPublishPayload.bytesToStringAsString(
-        recMess.payload.message,
-      );
-      final topic = messages.first.topic;
-      print(
-        'MQTT: Received message: topic is <$topic>, payload is <-- $payload -->',
-      );
-      onMessage?.call(topic, payload);
+        final payload = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        final topic = message.topic;
+        print('MQTT: Received message: topic is <$topic>, payload is <-- $payload -->');
+        onMessage?.call(topic, payload);
+      }
     });
   }
 
@@ -120,6 +116,16 @@ class MqttService {
     }
   }
 
+  // Convenience methods
+  void pumpOn() => publishMessage('sitech/farm/control/pump', 'ON');
+  void pumpOff() => publishMessage('sitech/farm/control/pump', 'OFF');
+  void fanOn() => publishMessage('sitech/farm/control/fan_speed', '130');
+  void fanOff() => publishMessage('sitech/farm/control/fan_speed', '0');
+  void alarmOn() => publishMessage('sitech/farm/control/alarm', 'ON');
+  void alarmOff() => publishMessage('sitech/farm/control/alarm', 'OFF');
+  void feedOpen() => publishMessage('sitech/farm/control/feed', 'OPEN');
+  void feedClose() => publishMessage('sitech/farm/control/feed', 'CLOSE');
+
   void disconnect() {
     _updatesSubscription?.cancel();
     _updatesSubscription = null;
@@ -130,7 +136,8 @@ class MqttService {
     try {
       client?.disconnect();
     } catch (_) {
-      // The mqtt_client package can throw if disconnect happens mid-setup.
+    } finally {
+      client = null; // Null out _client after disconnect so isConnected reports correctly
     }
   }
 
