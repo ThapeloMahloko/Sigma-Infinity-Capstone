@@ -11,7 +11,7 @@ from bokeh.models import CustomJS
 
 from config import PANEL_PORT, PANEL_TITLE
 from mqtt_handler import init_mqtt, set_active_doc
-from ui_components import hero, refresh_cards, refresh_graph
+from ui_components import hero, refresh_cards, refresh_graph, IS_DARK_MODE, update_dynamic_css, refresh_hero, dynamic_css
 from pages.dashboard import dashboard_page
 from pages.analytics import analytics_page
 from pages.export import export_page
@@ -55,6 +55,7 @@ pn.state.onload(open_browser)
 # =========================================================
 
 main_content = pn.Column(
+    dynamic_css,
     dashboard_page,
     sizing_mode="stretch_width"
 )
@@ -88,8 +89,18 @@ analytics_btn = pn.widgets.Button(name="📊 Analytics")
 export_btn = pn.widgets.Button(name="🗄 Data Export")
 controls_btn = pn.widgets.Button(name="⚙ Controls")
 telegram_btn = pn.widgets.Button(name="🤖 Telegram Bot")
+theme_btn = pn.widgets.Button(name="☀️ Light Mode", button_type="default")
 
+def toggle_theme(event):
+    IS_DARK_MODE[0] = not IS_DARK_MODE[0]
+    if IS_DARK_MODE[0]:
+        theme_btn.name = "☀️ Light Mode"
+    else:
+        theme_btn.name = "🌙 Dark Mode"
+    update_dynamic_css()
+    refresh_hero()
 
+theme_btn.on_click(toggle_theme)
 
 dashboard_btn.on_click(show_dashboard)
 analytics_btn.on_click(show_analytics)
@@ -113,6 +124,8 @@ sidebar = pn.Column(
     export_btn,
     controls_btn,
     telegram_btn,
+    pn.Spacer(height=20),
+    theme_btn,
 
 
 

@@ -21,17 +21,50 @@ from config import (
 
 pn.extension("tabulator", sizing_mode="stretch_width")
 
+IS_DARK_MODE = [True]
+
 def get_current_colors():
-    return {
-        "bg": COLOR_BACKGROUND,
-        "surface": COLOR_PRIMARY,
-        "surface_2": COLOR_SECONDARY,
-        "accent": COLOR_ACCENT,
-        "accent_soft": COLOR_ACCENT_LIGHT,
-        "text": COLOR_TEXT,
-        "text_muted": COLOR_TEXT_MUTED,
-        "border": COLOR_BORDER,
-    }
+    if IS_DARK_MODE[0]:
+        return {
+            "bg": COLOR_BACKGROUND,
+            "surface": COLOR_PRIMARY,
+            "surface_2": COLOR_SECONDARY,
+            "accent": COLOR_ACCENT,
+            "accent_soft": COLOR_ACCENT_LIGHT,
+            "text": COLOR_TEXT,
+            "text_muted": COLOR_TEXT_MUTED,
+            "border": COLOR_BORDER,
+        }
+    else:
+        return {
+            "bg": COLOR_BACKGROUND_LIGHT,
+            "surface": COLOR_PRIMARY_LIGHT,
+            "surface_2": COLOR_SECONDARY_LIGHT,
+            "accent": COLOR_ACCENT_LIGHT_MODE,
+            "accent_soft": COLOR_ACCENT_LIGHT_MODE_LIGHT,
+            "text": COLOR_TEXT_LIGHT,
+            "text_muted": COLOR_TEXT_MUTED_LIGHT,
+            "border": COLOR_BORDER_LIGHT,
+        }
+
+dynamic_css = pn.pane.HTML("")
+
+def update_dynamic_css():
+    colors = get_current_colors()
+    dynamic_css.object = f"""
+    <style>
+    body {{ background-color: {colors['bg']} !important; }}
+    .sidebar {{ background: {colors['surface_2']} !important; border-right: 1px solid {colors['border']} !important; }}
+    .hero {{ background: linear-gradient(135deg, {colors['surface']}, {colors['bg']}) !important; }}
+    .sensor-card {{ background: {colors['surface']} !important; border: 1px solid {colors['border']} !important; }}
+    .section-box {{ background: {colors['surface']} !important; border: 1px solid {colors['border']} !important; }}
+    h1,h2,h3,p,div {{ color: {colors['text']} !important; }}
+    .bk-input, .bk-input-group .bk-input, select.bk-input {{ background-color: {colors['surface']} !important; color: {colors['text']} !important; border: 1px solid {colors['border']} !important; }}
+    .bk-input option, select.bk-input option {{ background-color: {colors['surface']} !important; color: {colors['text']} !important; }}
+    </style>
+    """
+update_dynamic_css()
+
 
 
 # CSS STYLING
@@ -182,10 +215,11 @@ def refresh_cards():
     with data_lock:
         values = dict(sensor_values)
 
-    card_style = f"background: {COLOR_PRIMARY}; border-radius: 18px; padding: 20px; border: 1px solid {COLOR_BORDER}; min-height: 120px; display: flex; flex-direction: column; justify-content: center;"
-    label_style = f"font-size:14px;color:{COLOR_TEXT_MUTED}; text-transform: uppercase;"
-    value_style = f"font-size:48px;font-weight:bold;color:{COLOR_TEXT}; line-height: 1.2;"
-    status_val_style = f"font-size:20px;font-weight:600;color:{COLOR_TEXT};margin-top:8px;"
+    colors = get_current_colors()
+    card_style = f"background: {colors['surface']}; border-radius: 18px; padding: 20px; border: 1px solid {colors['border']}; min-height: 120px; display: flex; flex-direction: column; justify-content: center;"
+    label_style = f"font-size:14px;color:{colors['text_muted']}; text-transform: uppercase;"
+    value_style = f"font-size:48px;font-weight:bold;color:{colors['text']}; line-height: 1.2;"
+    status_val_style = f"font-size:20px;font-weight:600;color:{colors['text']};margin-top:8px;"
 
     temp_card.object = f"""
     <div style='{card_style}'>
@@ -267,12 +301,24 @@ plot.line(x="x", y="y", source=source, line_width=3, color=colors["accent"])
 plot.circle(x="x", y="y", source=source, size=8, color=colors["accent"])
 
 plot.title.text = "Live Sensor Trends"
-plot.title.text_color = colors["text"]
-plot.xaxis.major_label_text_color = colors["text"]
-plot.yaxis.major_label_text_color = colors["text"]
 
 hover = HoverTool(tooltips=[("Time", "@x{%F %T}"), ("Value", "@y")], formatters={"@x": "datetime"})
 plot.add_tools(hover)
+
+def update_plot_colors():
+    colors = get_current_colors()
+    plot.background_fill_color = colors["surface"]
+    plot.border_fill_color = colors["surface"]
+    plot.title.text_color = colors["text"]
+    plot.xaxis.major_label_text_color = colors["text"]
+    plot.yaxis.major_label_text_color = colors["text"]
+    plot.renderers[0].glyph.line_color = colors["accent"]
+    plot.renderers[1].glyph.fill_color = colors["accent"]
+    plot.renderers[1].glyph.line_color = colors["accent"]
+
+update_plot_colors()
+
+
 
 # =========================================================
 # SENSOR SELECTOR
@@ -314,6 +360,7 @@ def schedule_graph_refresh():
 
     def apply_graph_refresh():
         refresh_graph()
+        update_plot_colors()
 
     doc.add_next_tick_callback(apply_graph_refresh)
 
@@ -324,10 +371,16 @@ sensor_selector.param.watch(lambda event: schedule_graph_refresh(), "value")
 # NAVBAR / HERO
 # =========================================================
 
-hero = pn.pane.HTML("""
-<div class='hero'>
-<div style='font-size:14px;letter-spacing:4px;color:%s;'>LIVE SMART AGRICULTURE</div>
-<div style='font-size:56px;font-weight:800;color:%s;margin-top:10px;'>Smart Farm Dashboard</div>
-<div style='font-size:18px;color:%s;margin-top:15px;'>Real-time monitoring and intelligent automation</div>
-</div>
-""" % (COLOR_TEXT_MUTED, COLOR_TEXT, COLOR_TEXT_MUTED))
+hero = pn.pane.HTML("")
+
+def refresh_hero():
+    colors = get_current_colors()
+    hero.object = f"""
+    <div class='hero'>
+    <div style='font-size:14px;letter-spacing:4px;color:{colors['text_muted']};'>LIVE SMART AGRICULTURE</div>
+    <div style='font-size:56px;font-weight:800;color:{colors['text']};margin-top:10px;'>Smart Farm Dashboard</div>
+    <div style='font-size:18px;color:{colors['text_muted']};margin-top:15px;'>Real-time monitoring and intelligent automation</div>
+    </div>
+    """
+
+refresh_hero()
