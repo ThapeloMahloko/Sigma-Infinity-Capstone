@@ -55,7 +55,6 @@ pn.state.onload(open_browser)
 # =========================================================
 
 main_content = pn.Column(
-    dynamic_css,
     dashboard_page,
     sizing_mode="stretch_width"
 )
@@ -113,6 +112,7 @@ telegram_btn.on_click(show_telegram)
 # =========================================================
 
 sidebar = pn.Column(
+    dynamic_css,
     pn.pane.Markdown("""
 # 🌱 Smart Farm
 
