@@ -1,6 +1,12 @@
 # =========================================================
 # CONFIGURATION
 # =========================================================
+"""
+Configuration Module.
+
+Contains all global settings, environment variables, sensor definitions,
+and UI color schemes used across the Smart Farm Dashboard.
+"""
 
 import os
 

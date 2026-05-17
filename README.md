@@ -11,6 +11,11 @@ pinned: false
 
 This is a refactored version of the monolithic smart farm dashboard into a modular, maintainable architecture.
 
+## Author Information
+
+**Author**: Thapelo Mahloko (as inferred from project repository path)
+**Project**: Sigma Infinity Capstone
+
 ## Folder Structure
 
 ```
@@ -35,8 +40,9 @@ smart_farm_dashboard/
 ## How to Run
 
 1. **Install dependencies:**
+   Make sure you are using a virtual environment (e.g., `.venv`). If you see IDE errors like `Cannot find module 'sqlalchemy'`, make sure your IDE is using the correct virtual environment where you ran `pip install`.
    ```bash
-   cd smart_farm_dashboard
+   cd smart_farm_dashboard # or the directory containing the project
    pip install -r requirements.txt
    ```
 
@@ -44,10 +50,21 @@ smart_farm_dashboard/
    ```bash
    python main.py
    ```
+   Or if you want to specify a port:
+   ```bash
+   python main.py --port 5006
+   ```
 
 3. **Open browser:**
-   - Automatic: `http://localhost:5006`
-   - Manual: `http://localhost:5006`
+   - Automatic: The application should automatically launch in your default web browser at `http://localhost:5006`
+   - Manual: If the browser does not open automatically, manually navigate to `http://localhost:5006` (or whatever port you specified).
+
+## Usage Examples
+
+- **Dashboard**: The main page displays live sensor readings. You can observe the data updating every second (if connected to MQTT) and see historical trend lines.
+- **Analytics**: Navigate to the 'Analytics' tab on the sidebar. Select a sensor (e.g., Temperature) and a time range (e.g., 'Last 24 hours') to view statistical breakdown and historical graphs.
+- **Export**: Go to the 'Data Export' tab to download a CSV or JSON file of the sensor readings for reporting purposes.
+- **Controls**: Use the 'Controls' tab to manually turn the fan or water pump on/off via MQTT commands sent directly to the ESP32.
 
 ## Key Modules
 

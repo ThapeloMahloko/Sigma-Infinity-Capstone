@@ -163,8 +163,6 @@ def register_session_doc():
         doc.add_periodic_callback(refresh_live_view, 1000)
         doc._smart_farm_refresh_registered = True
 
-    doc.add_next_tick_callback(refresh_live_view)
-
 pn.state.onload(register_session_doc)
 
 

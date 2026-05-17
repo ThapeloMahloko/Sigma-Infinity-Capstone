@@ -235,7 +235,7 @@ plot = figure(
 )
 
 plot.line(x="x", y="y", source=source, line_width=3)
-plot.circle(x="x", y="y", source=source, size=8)
+plot.scatter(x="x", y="y", source=source, size=8)
 
 plot.title.text = "Live Sensor Trends"
 plot.title.text_color = COLOR_TEXT
@@ -278,18 +278,9 @@ def refresh_graph():
         y_values = list(sensor_series[selected_key])
 
     source.data = dict(x=x_values, y=y_values)
-    plot_pane.param.trigger('object')
 
 def schedule_graph_refresh():
-    doc = pn.state.curdoc
-    if doc is None:
-        refresh_graph()
-        return
-
-    def apply_graph_refresh():
-        refresh_graph()
-
-    doc.add_next_tick_callback(apply_graph_refresh)
+    refresh_graph()
 
 
 sensor_selector.param.watch(lambda event: schedule_graph_refresh(), "value")
