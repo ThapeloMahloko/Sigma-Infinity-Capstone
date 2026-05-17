@@ -66,7 +66,8 @@ export_status = pn.pane.Markdown("Ready to export.")
 export_table = pn.widgets.Tabulator(
     pd.DataFrame(),
     height=500,
-    sizing_mode="stretch_width"
+    sizing_mode="stretch_width",
+    theme="midnight"
 )
 
 # =========================================================
@@ -74,6 +75,12 @@ export_table = pn.widgets.Tabulator(
 # =========================================================
 
 def resolve_export_window():
+    """
+    Determines the start and end datetime for the export based on the selected range.
+
+    Returns:
+        Tuple[Optional[datetime], Optional[datetime]]: The start and end timestamps.
+    """
     range_name = export_range.value
 
     if range_name == "All time":
@@ -108,6 +115,17 @@ def toggle_export_sensor(event=None):
     export_sensor.disabled = export_scope.value == "All sensors"
 
 def fetch_export_dataframe():
+    """
+    Queries the database and returns a raw dataframe based on the selected scope,
+    sensor, and time window.
+
+    Returns:
+        Tuple[pd.DataFrame, Optional[datetime], Optional[datetime]]:
+            The raw dataframe and the evaluated start and end timestamps.
+
+    Raises:
+        ValueError: If the selected custom datetime range is invalid.
+    """
     start_time, end_time = resolve_export_window()
 
     if export_range.value == "Custom":

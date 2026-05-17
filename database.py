@@ -8,6 +8,7 @@ This module handles the SQLAlchemy setup, engine creation, session management,
 and provides helper functions for saving sensor data to the database.
 """
 
+# pyrefly: ignore [missing-import]
 from sqlalchemy import (
     create_engine,
     Column,
@@ -16,7 +17,9 @@ from sqlalchemy import (
     String,
     DateTime
 )
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import declarative_base, sessionmaker
+# pyrefly: ignore [missing-import]
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from config import DATABASE_URL

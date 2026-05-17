@@ -94,14 +94,22 @@ analytics_plot.add_tools(analytics_plot_hover)
 analytics_table = pn.widgets.Tabulator(
     pd.DataFrame(),
     height=500,
-    sizing_mode="stretch_width"
+    sizing_mode="stretch_width",
+    theme="midnight"
 )
 
 # =========================================================
 # ANALYTICS FUNCTIONS
 # =========================================================
 
-def sync_datetime_pickers(event=None):
+def sync_datetime_pickers(event=None) -> None:
+    """
+    Synchronizes the start and end datetime pickers based on the selected predefined range.
+    Does nothing if the 'Custom' range is selected.
+
+    Args:
+        event: The Panel event object (optional).
+    """
     if analytics_range.value == "Custom":
         return
 
@@ -109,7 +117,18 @@ def sync_datetime_pickers(event=None):
     analytics_start.value = start_time
     analytics_end.value = end_time
 
-def fetch_sensor_dataframe(sensor_key, start_time, end_time):
+def fetch_sensor_dataframe(sensor_key: str, start_time: datetime, end_time: datetime) -> pd.DataFrame:
+    """
+    Fetches sensor data from the database within the specified time range.
+
+    Args:
+        sensor_key (str): The identifier for the sensor.
+        start_time (datetime): The start of the time window.
+        end_time (datetime): The end of the time window.
+
+    Returns:
+        pd.DataFrame: A dataframe containing 'Sensor', 'Value', and 'Timestamp' columns.
+    """
     local_session = Session()
 
     try:
@@ -129,7 +148,14 @@ def fetch_sensor_dataframe(sensor_key, start_time, end_time):
     finally:
         local_session.close()
 
-def update_analytics(event=None):
+def update_analytics(event=None) -> None:
+    """
+    Updates the analytics plot, table, and statistics card based on the selected
+    sensor and time range.
+
+    Args:
+        event: The Panel event object (optional).
+    """
     sensor_key = analytics_sensor.value
     start_time, end_time = get_range_window(analytics_range.value, analytics_start, analytics_end)
 

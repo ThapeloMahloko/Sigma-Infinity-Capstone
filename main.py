@@ -160,7 +160,7 @@ def register_session_doc():
         refresh_graph()
 
     if not getattr(doc, "_smart_farm_refresh_registered", False):
-        doc.add_periodic_callback(refresh_live_view, 1000)
+        pn.state.add_periodic_callback(refresh_live_view, period=1000)
         doc._smart_farm_refresh_registered = True
 
 pn.state.onload(register_session_doc)
