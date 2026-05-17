@@ -6,7 +6,7 @@ import panel as pn
 from ui_components import (
     hero, temp_card, humidity_card, soil_card,
     water_card, light_card, rain_card, fan_card,
-    status_card, plot, sensor_selector
+    status_card, plot_pane, sensor_selector
 )
 
 dashboard_page = pn.Column(
@@ -35,7 +35,7 @@ dashboard_page = pn.Column(
             pn.pane.Markdown("## Live Sensor Trends"),
             sensor_selector
         ),
-        plot,
+        plot_pane,
         css_classes=["section-box"]
     )
 )

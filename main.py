@@ -146,7 +146,7 @@ dashboard.servable()
 try:
     init_mqtt()
 except Exception as e:
-    print(f"⚠ MQTT init warning: {e}")
+    print(f"MQTT init warning: {e}")
 
 def register_session_doc():
     doc = pn.state.curdoc
@@ -155,26 +155,15 @@ def register_session_doc():
 
     set_active_doc(doc)
 
+    def refresh_live_view():
+        refresh_cards()
+        refresh_graph()
+
     if not getattr(doc, "_smart_farm_refresh_registered", False):
         doc.add_periodic_callback(refresh_live_view, 1000)
         doc._smart_farm_refresh_registered = True
 
-    def prime_live_view():
-        refresh_live_view()
-
-    doc.add_next_tick_callback(prime_live_view)
-
-
-def refresh_live_view():
-    doc = pn.state.curdoc
-    if doc is None:
-        return
-
-    def apply_live_refresh():
-        refresh_cards()
-        refresh_graph()
-
-    doc.add_next_tick_callback(apply_live_refresh)
+    doc.add_next_tick_callback(refresh_live_view)
 
 pn.state.onload(register_session_doc)
 

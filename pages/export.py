@@ -9,7 +9,7 @@ import sqlite3
 import zipfile
 from datetime import datetime, timedelta
 
-from config import SENSOR_LABELS, SENSOR_UNITS
+from config import SENSOR_LABELS, SENSOR_UNITS, COLOR_TEXT_MUTED
 from database import Session, SensorData
 from utils import get_range_window, to_export_dataframe, dataframe_to_markdown
 

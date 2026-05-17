@@ -245,6 +245,8 @@ plot.yaxis.major_label_text_color = COLOR_TEXT
 hover = HoverTool(tooltips=[("Time", "@x{%F %T}"), ("Value", "@y")], formatters={"@x": "datetime"})
 plot.add_tools(hover)
 
+plot_pane = pn.pane.Bokeh(plot, sizing_mode="stretch_width")
+
 # =========================================================
 # SENSOR SELECTOR
 # =========================================================
@@ -276,6 +278,7 @@ def refresh_graph():
         y_values = list(sensor_series[selected_key])
 
     source.data = dict(x=x_values, y=y_values)
+    plot_pane.param.trigger('object')
 
 def schedule_graph_refresh():
     doc = pn.state.curdoc
