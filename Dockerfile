@@ -7,9 +7,10 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY main.py config.py database.py mqtt_handler.py ui_components.py utils.py telegram_qr.png ./
+COPY pages/*.py ./pages/
 
 EXPOSE 7860
 
 # Start Panel app - main.py contains the full Smart Farm Dashboard
-CMD python -m panel serve main.py --port 7860 --allow-websocket-origin="*"
+CMD exec python -m panel serve main.py --address 0.0.0.0 --port "$PORT" --allow-websocket-origin="*"

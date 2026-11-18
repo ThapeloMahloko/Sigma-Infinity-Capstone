@@ -159,6 +159,9 @@ def refresh_cards():
 
     with data_lock:
         values = dict(sensor_values)
+        alarm_state = alarm_status
+        feeder_state = feed_status
+        motion_state = motion_status
 
     temp_card.object = f"""
     <div class='sensor-card'>
@@ -213,7 +216,7 @@ def refresh_cards():
     <div class='sensor-card'>
         <div style='font-size:14px;color:{COLOR_TEXT_MUTED};'>SYSTEM STATUS</div>
         <div style='font-size:20px;font-weight:600;margin-top:8px;'>
-            Alarm: {alarm_status} | Feeder: {feed_status} | Motion: {motion_status}
+            Alarm: {alarm_state} | Feeder: {feeder_state} | Motion: {motion_state}
         </div>
     </div>
     """

@@ -1,0 +1,14 @@
+*
+!Dockerfile
+!.dockerignore
+!requirements.txt
+!main.py
+!config.py
+!database.py
+!mqtt_handler.py
+!ui_components.py
+!utils.py
+!telegram_qr.png
+!pages/
+pages/*
+!pages/*.py

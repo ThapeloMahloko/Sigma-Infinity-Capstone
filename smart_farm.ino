@@ -34,8 +34,8 @@ FEATURES
 // WIFI CONFIG
 // ===========================================================
 
-const char* ssid = "TP";
-const char* password = "Th@pelo0127";
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
 
 // ===========================================================
 // MQTT
@@ -553,7 +553,7 @@ void loop() {
 
       digitalWrite(LEDPIN, HIGH);
 
-      emergencySiren();
+      tone(BUZZERPIN, 1000);
 
       client.publish(
         "sitech/farm/alert",

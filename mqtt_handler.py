@@ -99,12 +99,13 @@ def on_message(client, userdata, msg) -> None:
         return
 
     # Handle status topics
-    if topic == "sitech/farm/alarm_status":
-        alarm_status = payload
-    elif topic == "sitech/farm/feed_status":
-        feed_status = payload
-    elif topic == "sitech/farm/alert":
-        motion_status = payload
+    with data_lock:
+        if topic == "sitech/farm/alarm_status":
+            alarm_status = payload
+        elif topic == "sitech/farm/feed_status":
+            feed_status = payload
+        elif topic == "sitech/farm/alert":
+            motion_status = payload
 
     schedule_ui_refresh()
 
@@ -153,9 +154,23 @@ def send_mqtt(topic: str, message: str) -> None:
         topic (str): The destination topic.
         message (str): The payload to send.
     """
+    global alarm_status
+
     try:
-        client.publish(topic, message)
+        if not client.is_connected():
+            print(f"MQTT unavailable: could not send {topic}: {message}")
+            return
+
+        result = client.publish(topic, message, qos=1)
+        if result.rc != mqtt.MQTT_ERR_SUCCESS:
+            print(f"Failed to send MQTT message: error code {result.rc}")
+            return
+
+        if topic == "sitech/farm/control/alarm":
+            with data_lock:
+                alarm_status = "ARMED" if message.upper() == "ON" else "DISARMED"
         print(f"SENT -> {topic}: {message}")
+        schedule_ui_refresh()
     except Exception as e:
         print(f"Failed to send MQTT message: {e}")
 
